@@ -18,12 +18,18 @@
  */
 
 // Include header files for each block used in flowgraph
+#include <gr_complex.h>
 #include <gr_top_block.h>
-#include <gr_firdes.h>
-#include <gr_fir_filter_ccf.h>
-#include <gr_quadrature_demod_cf.h>
-#include <gr_audio_sink.h>
-#include <fcd_source_c.h>
+#include <analog/quadrature_demod_cf.h>
+#include <blocks/file_sink.h>
+#include <blocks/file_source.h>
+#include <blocks/null_sink.h>
+#include <blocks/sub_ff.h>
+#include <blocks/throttle.h>
+#include <digital/clock_recovery_mm_ff.h>
+#include <filter/fft_filter_ccc.h>
+#include <filter/firdes.h>
+#include <filter/single_pole_iir_filter_ff.h>
 
 // other includes
 #include <iostream>
@@ -34,9 +40,7 @@ namespace po = boost::program_options;
 
 int main(int argc, char **argv)
 {
-    int rate = 48000;		// Audio card sample rate
-    float pi = 3.141592654;
-
+    double quad_rate = 2.e6;
 
     // command line options
     std::string device;
@@ -59,30 +63,41 @@ int main(int argc, char **argv)
         return ~0;
     }
 
-
     // Construct a top block that will contain flowgraph blocks.
-    gr_top_block_sptr tb = gr_make_top_block("fcd_nfm_rx");
+    gr_top_block_sptr tb = gr_make_top_block("strx");
 
-    // FCD source
-    fcd_source_c_sptr fcd = fcd_make_source_c(device);
-    fcd->set_freq_khz(freq);
-    fcd->set_lna_gain(gain);
+    gr::blocks::file_source::sptr src = gr::blocks::file_source::make(sizeof(gr_complex), "rf@2M-samples.raw", true);
+    gr::blocks::throttle::sptr throttle = gr::blocks::throttle::make(sizeof(gr_complex), quad_rate);
+    gr::blocks::null_sink::sptr sink = gr::blocks::null_sink::make(sizeof(float));
 
-    // Low pass filter
-    std::vector<float> taps = gr_firdes::low_pass(1.0, 96000, 5000.0, 1000.0);
-    gr_fir_filter_ccf_sptr filter = gr_make_fir_filter_ccf (2, taps);
+    // Complex band pass filter
+    std::vector<gr_complex> taps = gr::filter::firdes::complex_band_pass(1.0, quad_rate, -400e3, 400.3e3, 900.e3);
+    gr::filter::fft_filter_ccc::sptr filter = gr::filter::fft_filter_ccc::make(1, taps);
 
     // FM demodulator
     // gain = sample_rate / (2*pi*max_dev)
-    gr_quadrature_demod_cf_sptr demod = gr_make_quadrature_demod_cf (rate/(2.0*pi*5000.0));
+    //gr_quadrature_demod_cf_sptr demod = gr_make_quadrature_demod_cf (rate/(2.0*pi*5000.0));
+    gr::analog::quadrature_demod_cf::sptr demod = gr::analog::quadrature_demod_cf::make(1.f);
 
-    // Audio sink
-    audio_sink::sptr sink = audio_make_sink(rate);
+    // carrier offset compensation
+    gr::filter::single_pole_iir_filter_ff::sptr iir = gr::filter::single_pole_iir_filter_ff::make(1.e-3);
+    gr::blocks::sub_ff::sptr sub = gr::blocks::sub_ff::make();
+    
+    // clock recovery
+    gr::digital::clock_recovery_mm_ff::sptr clock_recov = gr::digital::clock_recovery_mm_ff::make(8.f, 10.e-3f, 10.e-3f, 1.e-3f, 10.e-3f);
 
+    // fifo sink
+    gr::blocks::file_sink::sptr fifo = gr::blocks::file_sink::make(sizeof(float), "fifo");
+    
     // Connect blocks
-    tb->connect(fcd, 0, filter, 0);
+    tb->connect(src, 0, throttle, 0);
+    tb->connect(throttle, 0, filter, 0);
     tb->connect(filter, 0, demod, 0);
-    tb->connect(demod, 0, sink, 0);
+    tb->connect(demod, 0, iir, 0);
+    tb->connect(demod, 0, sub, 0);
+    tb->connect(iir, 0, sub, 1);
+    tb->connect(sub, 0, clock_recov, 0);
+    tb->connect(clock_recov, 0, fifo, 0);
 
     // Tell GNU Radio runtime to start flowgraph threads; the foreground thread
     // will block until either flowgraph exits (this example doesn't) or the
