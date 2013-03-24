@@ -1,7 +1,7 @@
 #####################################################################
 # Setup
 #####################################################################
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 2.8)
 project(strx CXX C)
 set(strx_VERSION_MAJOR 0)
 set(strx_VERSION_MINOR 1)
@@ -46,23 +46,23 @@ find_package(GnuradioFilter)
 find_package(GnuradioAudio)
 
 if (NOT GRUEL_FOUND)
-    message(FATAL_ERROR "gruel is required to compile strx")
+    message(FATAL_ERROR "gruel 3.7 or later is required to compile strx")
 endif()
 
 if (NOT GNURADIO_CORE_FOUND)
-    message(FATAL_ERROR "gnuradio-core is required to compile strx")
+    message(FATAL_ERROR "gnuradio-core 3.7 or later is required to compile strx")
 endif()
 
 if (NOT GNURADIO_UHD_FOUND)
-    message(FATAL_ERROR "gnuradio-uhd is required to compile strx")
+    message(FATAL_ERROR "gnuradio-uhd 3.7 or later is required to compile strx")
 endif()
 
 if (NOT GNURADIO_FILTER_FOUND)
-    message(FATAL_ERROR "gnuradio-filter is required to compile strx")
+    message(FATAL_ERROR "gnuradio-filter 3.7 or later is required to compile strx")
 endif()
 
 if (NOT GNURADIO_AUDIO_FOUND)
-    message(FATAL_ERROR "gnuradio-audio is required to compile strx")
+    message(FATAL_ERROR "gnuradio-audio 3.7 or later is required to compile strx")
 endif()
 
 
