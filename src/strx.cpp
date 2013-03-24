@@ -32,20 +32,21 @@
 #include <filter/single_pole_iir_filter_ff.h>
 
 // other includes
-#include <iostream>
-#include <boost/program_options.hpp>
+//#include <iostream>
+//#include <boost/program_options.hpp>
 
-
-namespace po = boost::program_options;
+//namespace po = boost::program_options;
 
 int main(int argc, char **argv)
 {
     double quad_rate = 2.e6;
 
+/*
     // command line options
     std::string device;
     int freq;
     float gain;
+
 
     po::options_description desc("Command line options");
     desc.add_options()
@@ -62,7 +63,7 @@ int main(int argc, char **argv)
         std::cout << "Narrow band FM receiver example" << std::endl << desc << std::endl;
         return ~0;
     }
-
+*/
     // Construct a top block that will contain flowgraph blocks.
     gr_top_block_sptr tb = gr_make_top_block("strx");
 
