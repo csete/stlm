@@ -41,8 +41,11 @@ include(GrBoost)
 
 find_package(Gruel)
 find_package(GnuradioCore)
+find_package(GnuradioBlocks)
 find_package(GnuradioUHD)
 find_package(GnuradioFilter)
+find_package(GnuradioAnalog)
+find_package(GnuradioDigital)
 find_package(GnuradioAudio)
 
 if (NOT GRUEL_FOUND)
@@ -53,12 +56,24 @@ if (NOT GNURADIO_CORE_FOUND)
     message(FATAL_ERROR "gnuradio-core 3.7 or later is required to compile strx")
 endif()
 
+if (NOT GNURADIO_BLOCKS_FOUND)
+    message(FATAL_ERROR "gnuradio-blocks 3.7 or later is required to compile strx")
+endif()
+
 if (NOT GNURADIO_UHD_FOUND)
     message(FATAL_ERROR "gnuradio-uhd 3.7 or later is required to compile strx")
 endif()
 
 if (NOT GNURADIO_FILTER_FOUND)
     message(FATAL_ERROR "gnuradio-filter 3.7 or later is required to compile strx")
+endif()
+
+if (NOT GNURADIO_ANALOG_FOUND)
+    message(FATAL_ERROR "gnuradio-analog 3.7 or later is required to compile strx")
+endif()
+
+if (NOT GNURADIO_DIGITAL_FOUND)
+    message(FATAL_ERROR "gnuradio-digital 3.7 or later is required to compile strx")
 endif()
 
 if (NOT GNURADIO_AUDIO_FOUND)
@@ -73,8 +88,11 @@ include_directories(
     ${Boost_INCLUDE_DIRS}
     ${GRUEL_INCLUDE_DIRS}
     ${GNURADIO_CORE_INCLUDE_DIRS}
+    ${GNURADIO_CORE_BLOCKS_DIRS}
     ${GNURADIO_UHD_INCLUDE_DIRS}
     ${GNURADIO_FILTER_INCLUDE_DIRS}
+    ${GNURADIO_ANALOG_INCLUDE_DIRS}
+    ${GNURADIO_DIGITAL_INCLUDE_DIRS}
     ${GNURADIO_AUDIO_INCLUDE_DIRS}
 )
 
@@ -82,17 +100,23 @@ link_directories(
     ${Boost_LIBRARY_DIRS}
     ${GRUEL_LIBRARY_DIRS}
     ${GNURADIO_CORE_LIBRARY_DIRS}
+    ${GNURADIO_CORE_BLOCKS_DIRS}
     ${GNURADIO_UHD_LIBRARY_DIRS}
     ${GNURADIO_FILTER_LIBRARY_DIRS}
+    ${GNURADIO_ANALOG_LIBRARY_DIRS}
+    ${GNURADIO_DIGITAL_LIBRARY_DIRS}
     ${GNURADIO_AUDIO_LIBRARY_DIRS}
 )
 
 set(gr_link_libs
     ${Boost_LIBRARIES}
     ${GRUEL_LIBRARIES}
-    ${GNURADIO_CORE_LIBRARIES} 
+    ${GNURADIO_CORE_LIBRARIES}
+    ${GNURADIO_BLOCKS_LIBRARIES}
     ${GNURADIO_UHD_LIBRARIES}
     ${GNURADIO_FILTER_LIBRARIES}
+    ${GNURADIO_ANALOG_LIBRARIES}
+    ${GNURADIO_DIGITAL_LIBRARIES}
     ${GNURADIO_AUDIO_LIBRARIES}
 )
 

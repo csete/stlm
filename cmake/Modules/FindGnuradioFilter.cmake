@@ -3,7 +3,7 @@ PKG_CHECK_MODULES(PC_GNURADIO_FILTER gnuradio-filter>=3.7)
 
 FIND_PATH(
     GNURADIO_FILTER_INCLUDE_DIRS
-    NAMES gnuradio/filter/firdes.h
+    NAMES gnuradio/filter/api.h
     HINTS $ENV{GNURADIO_FILTER_DIR}/include
         ${PC_GNURADIO_FILTER_INCLUDEDIR}
     PATHS /usr/local/include
