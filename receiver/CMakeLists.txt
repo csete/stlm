@@ -125,13 +125,16 @@ set(gr_link_libs
 # Header files
 #####################################################################
 set(strx_HDRS
-#    src/strx.h
+    src/correlator/api.h
+    src/correlator/correlator.h
+    src/correlator/correlator_impl.h
 )
 
 #####################################################################
 # Source files
 #####################################################################
 set(strx_SRCS
+    src/correlator/correlator_impl.cpp
     src/strx.cpp
 )
 
