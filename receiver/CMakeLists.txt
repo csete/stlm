@@ -120,27 +120,15 @@ set(gr_link_libs
     ${GNURADIO_AUDIO_LIBRARIES}
 )
 
+#set(strx_HDRS
+#)
 
-#####################################################################
-# Header files
-#####################################################################
-set(strx_HDRS
-    src/correlator/api.h
-    src/correlator/correlator.h
-    src/correlator/correlator_impl.h
-)
-
-#####################################################################
-# Source files
-#####################################################################
 set(strx_SRCS
-    src/correlator/correlator_impl.cpp
     src/strx.cpp
 )
 
-#####################################################################
-# Compile and Link
-#####################################################################
 add_executable(strx ${strx_SRCS})
 target_link_libraries(strx ${gr_link_libs})
 
+# Correlator & decoder
+add_executable(correlator decoder/correlator.c)
