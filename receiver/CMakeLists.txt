@@ -124,7 +124,7 @@ set(gr_link_libs
 #)
 
 set(strx_SRCS
-    src/strx.cpp
+    strx/strx.cpp
 )
 
 add_executable(strx ${strx_SRCS})
