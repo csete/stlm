@@ -40,7 +40,7 @@ endif(CMAKE_COMPILER_IS_GNUCXX)
 include(GrBoost)
 
 find_package(Gruel)
-find_package(GnuradioCore)
+find_package(GnuradioRuntime)
 find_package(GnuradioBlocks)
 find_package(GnuradioUHD)
 find_package(GnuradioFilter)
@@ -52,8 +52,8 @@ if (NOT GRUEL_FOUND)
     message(FATAL_ERROR "gruel 3.7 or later is required to compile strx")
 endif()
 
-if (NOT GNURADIO_CORE_FOUND)
-    message(FATAL_ERROR "gnuradio-core 3.7 or later is required to compile strx")
+if (NOT GNURADIO_RUNTIME_FOUND)
+    message(FATAL_ERROR "gnuradio-runtime 3.7 or later is required to compile strx")
 endif()
 
 if (NOT GNURADIO_BLOCKS_FOUND)
@@ -87,8 +87,8 @@ endif()
 include_directories(
     ${Boost_INCLUDE_DIRS}
     ${GRUEL_INCLUDE_DIRS}
-    ${GNURADIO_CORE_INCLUDE_DIRS}
-    ${GNURADIO_CORE_BLOCKS_DIRS}
+    ${GNURADIO_RUNTIME_INCLUDE_DIRS}
+    ${GNURADIO_BLOCKS_INCLUDE_DIRS}
     ${GNURADIO_UHD_INCLUDE_DIRS}
     ${GNURADIO_FILTER_INCLUDE_DIRS}
     ${GNURADIO_ANALOG_INCLUDE_DIRS}
@@ -99,8 +99,8 @@ include_directories(
 link_directories(
     ${Boost_LIBRARY_DIRS}
     ${GRUEL_LIBRARY_DIRS}
-    ${GNURADIO_CORE_LIBRARY_DIRS}
-    ${GNURADIO_CORE_BLOCKS_DIRS}
+    ${GNURADIO_RUNTIME_LIBRARY_DIRS}
+    ${GNURADIO_BLOCKS_LIBRARY_DIRS}
     ${GNURADIO_UHD_LIBRARY_DIRS}
     ${GNURADIO_FILTER_LIBRARY_DIRS}
     ${GNURADIO_ANALOG_LIBRARY_DIRS}
@@ -111,7 +111,7 @@ link_directories(
 set(gr_link_libs
     ${Boost_LIBRARIES}
     ${GRUEL_LIBRARIES}
-    ${GNURADIO_CORE_LIBRARIES}
+    ${GNURADIO_RUNTIME_LIBRARIES}
     ${GNURADIO_BLOCKS_LIBRARIES}
     ${GNURADIO_UHD_LIBRARIES}
     ${GNURADIO_FILTER_LIBRARIES}
