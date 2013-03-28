@@ -40,7 +40,7 @@ int main(int argc, char **argv)
     desc.add_options()
         ("help,h", "This help message")
         ("freq,f", po::value<double>(&freq)->default_value(2335.0e6), "RF frequency in Hz")
-        ("gain,g", po::value<double>(&gain)->default_value(20.0), "RF gain in dB")
+        ("gain,g", po::value<double>(&gain), "RF gain in dB (default is mid range)")
         ("output,o", po::value<std::string>(&output)->default_value(""), "Output file (use stdout if omitted)")
     ;
     po::variables_map vm;
@@ -60,8 +60,13 @@ int main(int argc, char **argv)
         return 1;
     }
 
-
     rx = new receiver("", output);
+    rx->set_rf_freq(freq);
+    if (vm.count("gain"))
+    {
+        rx->set_rf_gain(gain);
+    }
+
     rx->start();
 
     delete rx;
