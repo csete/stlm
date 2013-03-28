@@ -30,7 +30,7 @@ set(BOOST_REQUIRED_COMPONENTS
 #    date_time
     program_options
 #    filesystem
-#    system
+    system
 #    thread
 )
 
