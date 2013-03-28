@@ -23,6 +23,7 @@
 /*! \brief Public contructor.
  *  \param input Input device specifier.
  *  \param output Output file name. Using stdout if empty.
+ *  \param quad_rate Quadrature rate in samples per second.
  */
 receiver::receiver(const std::string input, const std::string output, double quad_rate)
     : d_running(false),
@@ -49,7 +50,6 @@ receiver::receiver(const std::string input, const std::string output, double qua
     }
 
     connect_all();
-
 }
 
 /*! \brief Public destructor. */
