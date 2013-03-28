@@ -20,42 +20,47 @@
 #include "receiver.h"
 
 // other includes
-//#include <iostream>
-//#include <boost/program_options.hpp>
+#include <boost/program_options.hpp>
+#include <iostream>
 
-//namespace po = boost::program_options;
+namespace po = boost::program_options;
 
 int main(int argc, char **argv)
 {
     receiver *rx;
 
-/*
     // command line options
-    std::string device;
     int freq;
     float gain;
-
+    bool clierr=false;
 
     po::options_description desc("Command line options");
     desc.add_options()
-        ("help", "This help message")
-        ("device", po::value<std::string>(&device)->default_value("hw:1"), "Audio input device")
-        ("freq", po::value<int>(&freq)->default_value(145500), "RF frequency in kHz")
-        ("gain", po::value<float>(&gain)->default_value(20.0), "LNA gain in dB")
+        ("help,h", "This help message")
+        ("freq,f", po::value<int>(&freq)->default_value(145500), "RF frequency in kHz")
+        ("gain,g", po::value<float>(&gain)->default_value(20.0), "RF gain in dB")
     ;
     po::variables_map vm;
-    po::store(po::parse_command_line(argc, argv, desc), vm);
+    try
+    {
+        po::store(po::parse_command_line(argc, argv, desc), vm);
+    }
+    catch(const boost::program_options::invalid_command_line_syntax& ex)
+    {
+        /* happens if e.g. -c without file name */
+        clierr = true;
+    }
     po::notify(vm);
 
-    if (vm.count("help")){
-        std::cout << "Narrow band FM receiver example" << std::endl << desc << std::endl;
-        return ~0;
+    if (vm.count("help") || clierr)
+    {
+        std::cout << "Sapphire telemetry receiver " << VERSION << std::endl << desc << std::endl;
+        return 1;
     }
-*/
+
 
     rx = new receiver();
     rx->start();
-
 
     delete rx;
 
