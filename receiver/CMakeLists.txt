@@ -120,10 +120,12 @@ set(gr_link_libs
     ${GNURADIO_AUDIO_LIBRARIES}
 )
 
-#set(strx_HDRS
-#)
+set(strx_HDRS
+    strx/receiver.h
+)
 
 set(strx_SRCS
+    strx/receiver.cpp
     strx/strx.cpp
 )
 
