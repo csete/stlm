@@ -4,8 +4,8 @@
 cmake_minimum_required(VERSION 2.8)
 project(strx CXX C)
 set(strx_VERSION_MAJOR 0)
-set(strx_VERSION_MINOR 1)
-add_definitions(-DVERSION="\"${VERSION_MAJOR}"."${VERSION_MINOR}"\")
+set(strx_VERSION_MINOR 2)
+add_definitions(-DVERSION="${strx_VERSION_MAJOR}.${strx_VERSION_MINOR}")
 
 # select the release build type by default to get optimization flags
 if(NOT CMAKE_BUILD_TYPE)
