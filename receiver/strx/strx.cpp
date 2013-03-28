@@ -22,6 +22,7 @@
 // other includes
 #include <boost/program_options.hpp>
 #include <iostream>
+#include <string>
 
 namespace po = boost::program_options;
 
@@ -33,12 +34,14 @@ int main(int argc, char **argv)
     int freq;
     float gain;
     bool clierr=false;
+    std::string output;
 
     po::options_description desc("Command line options");
     desc.add_options()
         ("help,h", "This help message")
         ("freq,f", po::value<int>(&freq)->default_value(145500), "RF frequency in kHz")
         ("gain,g", po::value<float>(&gain)->default_value(20.0), "RF gain in dB")
+        ("output,o", po::value<std::string>(&output)->default_value(""), "Output file (use stdout if omitted)")
     ;
     po::variables_map vm;
     try
@@ -47,7 +50,6 @@ int main(int argc, char **argv)
     }
     catch(const boost::program_options::invalid_command_line_syntax& ex)
     {
-        /* happens if e.g. -c without file name */
         clierr = true;
     }
     po::notify(vm);
@@ -59,7 +61,7 @@ int main(int argc, char **argv)
     }
 
 
-    rx = new receiver();
+    rx = new receiver("", output);
     rx->start();
 
     delete rx;

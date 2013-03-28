@@ -53,7 +53,7 @@ class receiver
 
 public:
 
-    receiver(const std::string input_device="", const std::string audio_device="", double quad_rate=2.e6);
+    receiver(const std::string input="", const std::string output="", double quad_rate=2.e6);
     ~receiver();
 
     void start();

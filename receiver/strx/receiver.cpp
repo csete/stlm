@@ -21,12 +21,10 @@
 
 
 /*! \brief Public contructor.
- *  \param input_device Input device specifier.
- *  \param audio_device Audio output device specifier,
- *                      e.g. hw:0 when using ALSA or Portaudio.
- *
+ *  \param input Input device specifier.
+ *  \param output Output file name. Using stdout if empty.
  */
-receiver::receiver(const std::string input_device, const std::string audio_device, double quad_rate)
+receiver::receiver(const std::string input, const std::string output, double quad_rate)
     : d_running(false),
       d_quad_rate(quad_rate)
 {
@@ -40,7 +38,15 @@ receiver::receiver(const std::string input_device, const std::string audio_devic
     iir = gr::filter::single_pole_iir_filter_ff::make(1.e-3);
     sub = gr::blocks::sub_ff::make();
     clock_recov = gr::digital::clock_recovery_mm_ff::make(8.f, 10.e-3f, 10.e-3f, 1.e-3f, 10.e-3f);
-    fifo = gr::blocks::file_sink::make(sizeof(float), "fifo");
+
+    if (output.empty())
+    {
+        fifo = gr::blocks::file_sink::make(sizeof(float), "/dev/fd/1");
+    }
+    else
+    {
+        fifo = gr::blocks::file_sink::make(sizeof(float), output.c_str());
+    }
 
     connect_all();
 
