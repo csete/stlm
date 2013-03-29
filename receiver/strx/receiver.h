@@ -63,6 +63,8 @@ public:
     void set_input_device(const std::string device);
     void set_output_device(const std::string device);
 
+    void set_antenna(std::string antenna);
+
     void rf_freq_range(double *start, double *stop, double *step);
     void set_rf_freq(double freq);
     double rf_freq(void);

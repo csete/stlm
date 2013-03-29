@@ -65,6 +65,7 @@ int main(int argc, char **argv)
 
     // command line options
     std::string freq_str;
+    std::string ant_str;
     double freq;
     double gain;
     bool clierr=false;
@@ -75,6 +76,7 @@ int main(int argc, char **argv)
     desc.add_options()
         ("help,h", "This help message")
         ("input,i", po::value<std::string>(&input)->default_value(""), "USRP sub device or I/Q file (use file:/path/to/file)")
+        ("ant,a", po::value<std::string>(&ant_str), "Select USRP antenna (e.g. RX2)")
         ("freq,f", po::value<std::string>(&freq_str), "RF frequency in Hz or using G, M, k suffix")
         ("gain,g", po::value<double>(&gain), "RF/IF gain in dB")
         ("output,o", po::value<std::string>(&output)->default_value(""), "Output file (use stdout if omitted)")
@@ -107,6 +109,10 @@ int main(int argc, char **argv)
     if (vm.count("gain"))
     {
         rx->set_rf_gain(gain);
+    }
+    if (vm.count("ant"))
+    {
+        rx->set_antenna(ant_str);
     }
 
     rx->start();

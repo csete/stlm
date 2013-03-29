@@ -141,6 +141,12 @@ void receiver::set_output_device(const std::string device)
     */
 }
 
+void receiver::set_antenna(std::string antenna)
+{
+    if (input_type == INPUT_TYPE_UHD)
+        usrp_src->set_antenna(antenna);
+}
+
 /*! Set new RF frequency.
  * \param freq_hz The new frequency in Hz.
  *
