@@ -26,11 +26,45 @@
 
 namespace po = boost::program_options;
 
+
+/*! Convert command line argument to frequency in Hz.
+ * \param arg The command line argument, e.g. 2400M
+ * \return The frequency in Hz.
+ */
+double arg_to_freq(const std::string arg)
+{
+    std::string _freq = arg;
+    double freq;
+    double suff = 1.0;
+
+	switch (_freq[_freq.length()-1])
+    {
+        case 'G':
+            suff = 1.e9;
+            _freq.erase(_freq.end()-1, _freq.end());
+            break;
+		case 'M':
+			suff = 1.e6;
+            _freq.erase(_freq.end()-1, _freq.end());
+            break;
+		case 'k':
+			suff = 1.e3;
+            _freq.erase(_freq.end()-1, _freq.end());
+            break;
+    }
+
+    freq = atof(_freq.c_str()) * suff;
+
+    return freq;
+}
+
+
 int main(int argc, char **argv)
 {
     receiver *rx;
 
     // command line options
+    std::string freq_str;
     double freq;
     double gain;
     bool clierr=false;
@@ -41,8 +75,8 @@ int main(int argc, char **argv)
     desc.add_options()
         ("help,h", "This help message")
         ("input,i", po::value<std::string>(&input)->default_value(""), "USRP sub device or I/Q file (use file:/path/to/file)")
-        ("freq,f", po::value<double>(&freq)->default_value(2335.0e6), "RF frequency in Hz")
-        ("gain,g", po::value<double>(&gain), "RF gain in dB (default is mid range)")
+        ("freq,f", po::value<std::string>(&freq_str), "RF frequency in Hz or using G, M, k suffix")
+        ("gain,g", po::value<double>(&gain), "RF/IF gain (relative scale 0..100)")
         ("output,o", po::value<std::string>(&output)->default_value(""), "Output file (use stdout if omitted)")
     ;
     po::variables_map vm;
@@ -62,8 +96,14 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    // create receiver and set paarameters
     rx = new receiver(input, output);
-    rx->set_rf_freq(freq);
+
+    if (vm.count("freq"))
+    {
+        freq = arg_to_freq(freq_str);
+        rx->set_rf_freq(freq);
+    }
     if (vm.count("gain"))
     {
         rx->set_rf_gain(gain);
