@@ -63,10 +63,11 @@ public:
     void set_input_device(const std::string device);
     void set_output_device(const std::string device);
 
+    void rf_freq_range(double *start, double *stop, double *step);
     void set_rf_freq(double freq);
     double rf_freq(void);
-    void rf_range(double *start, double *stop, double *step);
 
+    void rf_gain_range(double *start, double *stop, double *step);
     void set_rf_gain(double gain);
     double rf_gain(void);
 

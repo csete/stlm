@@ -141,34 +141,87 @@ void receiver::set_output_device(const std::string device)
     */
 }
 
+/*! Set new RF frequency.
+ * \param freq_hz The new frequency in Hz.
+ *
+ * This function has no effect when using an I/Q file as input.
+ */
 void receiver::set_rf_freq(double freq_hz)
 {
-
+    if (input_type == INPUT_TYPE_UHD)
+        usrp_src->set_center_freq(freq_hz);
 }
 
+/*! Get current RF frequency.
+ * \returns The current RF frequency or 0 if using a file input.
+ */
 double receiver::rf_freq(void)
 {
-    return 0.0;
+    if (input_type == INPUT_TYPE_UHD)
+        return usrp_src->get_center_freq();
+    else
+        return 0.0;
 }
 
-void receiver::rf_range(double *start, double *stop, double *step)
+/*! Get RF frequency range for the current device
+ * \param[out] start The lower end of the frequency range.
+ * \param[out] stop The upper end of the frequency range.
+ * \param[out] step ???
+ */
+void receiver::rf_freq_range(double *start, double *stop, double *step)
 {
-
+    if (input_type == INPUT_TYPE_UHD)
+    {
+        uhd::freq_range_t range = usrp_src->get_freq_range();
+        *start = range.start();
+        *stop = range.stop();
+        *step = range.step();
+    }
 }
 
+/*! Set new RF gain.
+ * \param gain The new gain in dB.
+ *
+ * This function has no effect when using an I/Q file input.
+ */
 void receiver::set_rf_gain(double gain)
 {
+    if (input_type == INPUT_TYPE_UHD)
+        usrp_src->set_gain(gain);
 }
 
+/*! Get current RF gain.
+ * \returns The current RF gain or 0 if using an I/Q file as input.
+ */
 double receiver::rf_gain(void)
 {
-    return 0.0;
+    if (input_type == INPUT_TYPE_UHD)
+        return usrp_src->get_gain();
+    else
+        return 0.0;
+}
+
+/*! Get gain range for current USRP device.
+ * \param[out] start The lower limit of the gain range.
+ * \param[out] stop The upper limit of the gain range.
+ * \param[out] step ???
+ */
+void receiver::rf_gain_range(double *start, double *stop, double *step)
+{
+    if (input_type == INPUT_TYPE_UHD)
+    {
+        uhd::gain_range_t range = usrp_src->get_gain_range();
+        *start = range.start();
+        *stop = range.stop();
+        *step = range.step();
+    }
 }
 
 void receiver::set_filter(double low, double high, double trans_width)
 {
 }
 
+/*! Connect all blocks in the receiver chain. */
 void receiver::connect_all()
 {
     if (input_type == INPUT_TYPE_FILE)
