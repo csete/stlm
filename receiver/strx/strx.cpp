@@ -34,11 +34,13 @@ int main(int argc, char **argv)
     double freq;
     double gain;
     bool clierr=false;
+    std::string input;
     std::string output;
 
     po::options_description desc("Command line options");
     desc.add_options()
         ("help,h", "This help message")
+        ("input,i", po::value<std::string>(&input)->default_value(""), "USRP sub device or I/Q file (use file:/path/to/file)")
         ("freq,f", po::value<double>(&freq)->default_value(2335.0e6), "RF frequency in Hz")
         ("gain,g", po::value<double>(&gain), "RF gain in dB (default is mid range)")
         ("output,o", po::value<std::string>(&output)->default_value(""), "Output file (use stdout if omitted)")
@@ -60,7 +62,7 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    rx = new receiver("", output);
+    rx = new receiver(input, output);
     rx->set_rf_freq(freq);
     if (vm.count("gain"))
     {

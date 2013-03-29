@@ -75,15 +75,25 @@ private:
     void connect_all(void);
 
 private:
+
+    /*! Input type. */
+    enum input_type_e
+    {
+        INPUT_TYPE_FILE = 0, /*!< Input is complex 2 Msps I/Q file. */
+        INPUT_TYPE_UHD  = 1, /*!< Input is a USRP device. */
+    };
+    
+    input_type_e input_type;
+
     gr_top_block_sptr tb;  /*!< Receiver top block. */
     
-    gr::blocks::file_source::sptr    src;
-    gr::blocks::throttle::sptr       throttle;
-    std::vector<gr_complex>          taps;
-    gr::filter::fft_filter_ccc::sptr filter;
-    gr::analog::quadrature_demod_cf::sptr demod;
-    gr::filter::single_pole_iir_filter_ff::sptr iir;
-    gr::blocks::sub_ff::sptr sub;
+    gr::blocks::file_source::sptr               file_src;  /*!< I/Q file source. */
+    gr::blocks::throttle::sptr                  throttle;  /*!< Rate limiter for file sources. */
+    std::vector<gr_complex>                     taps;
+    gr::filter::fft_filter_ccc::sptr            filter;    /*!< Channel filter. */
+    gr::analog::quadrature_demod_cf::sptr       demod;     /*!< Demodulator. */
+    gr::filter::single_pole_iir_filter_ff::sptr iir;       /*!< IIR filter for carrier offset estimation. */
+    gr::blocks::sub_ff::sptr                    sub;       /*!< Carrier offset correction. */
     
     gr::digital::clock_recovery_mm_ff::sptr clock_recov;
     gr::blocks::file_sink::sptr fifo;

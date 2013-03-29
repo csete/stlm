@@ -21,18 +21,36 @@
 
 
 /*! \brief Public contructor.
- *  \param input Input device specifier.
+ *  \param input Input device specifier (see below).
  *  \param output Output file name. Using stdout if empty.
  *  \param quad_rate Quadrature rate in samples per second.
+ * 
+ * The input can be a complex I/Q file or a USRP device. I/Q file is selected if the device string
+ * is of the form "file:/some/path", otherwise UHD is assumed with subdev in the string.
+ * 
+ * \todo Use gr-osmosdr as soon as it support gnuradio 3.7
  */
 receiver::receiver(const std::string input, const std::string output, double quad_rate)
     : d_running(false),
       d_quad_rate(quad_rate)
 {
+    
+    // Check input type
+    if (input.find("file:") != std::string::npos)
+    {
+        input_type = INPUT_TYPE_FILE;
+        
+        std::string filename = input.substr(5);
+        file_src = gr::blocks::file_source::make(sizeof(gr_complex), filename.c_str(), true);
+        throttle = gr::blocks::throttle::make(sizeof(gr_complex), d_quad_rate);
+    }
+    else
+    {
+        input_type = INPUT_TYPE_UHD;
+    }
 
     tb = gr_make_top_block("strx");
-    src = gr::blocks::file_source::make(sizeof(gr_complex), "rf@2M-samples.raw", true);
-    throttle = gr::blocks::throttle::make(sizeof(gr_complex), d_quad_rate);
+
     taps = gr::filter::firdes::complex_band_pass(1.0, d_quad_rate, -400e3, 400.3e3, 900.e3);
     filter = gr::filter::fft_filter_ccc::make(1, taps);
     demod = gr::analog::quadrature_demod_cf::make(1.f);
@@ -150,8 +168,12 @@ void receiver::set_filter(double low, double high, double trans_width)
 
 void receiver::connect_all()
 {
-    tb->connect(src, 0, throttle, 0);
-    tb->connect(throttle, 0, filter, 0);
+    if (input_type == INPUT_TYPE_FILE)
+    {
+        tb->connect(file_src, 0, throttle, 0);
+        tb->connect(throttle, 0, filter, 0);
+    }
+        
     tb->connect(filter, 0, demod, 0);
     tb->connect(demod, 0, iir, 0);
     tb->connect(demod, 0, sub, 0);
