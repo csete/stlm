@@ -39,7 +39,6 @@ receiver::receiver(const std::string input, const std::string output, double qua
     if (input.find("file:") != std::string::npos)
     {
         input_type = INPUT_TYPE_FILE;
-        
         std::string filename = input.substr(5);
         file_src = gr::blocks::file_source::make(sizeof(gr_complex), filename.c_str(), true);
         throttle = gr::blocks::throttle::make(sizeof(gr_complex), d_quad_rate);
@@ -47,6 +46,10 @@ receiver::receiver(const std::string input, const std::string output, double qua
     else
     {
         input_type = INPUT_TYPE_UHD;
+        usrp_src = gr::uhd::usrp_source::make(uhd::device_addr_t(""), uhd::io_type_t::COMPLEX_FLOAT32, 1);
+        usrp_src->set_samp_rate(d_quad_rate);
+        if (!input.empty())
+            usrp_src->set_subdev_spec(input);
     }
 
     tb = gr_make_top_block("strx");
@@ -153,7 +156,7 @@ void receiver::rf_range(double *start, double *stop, double *step)
 
 }
 
-void receiver::set_rf_gain(double gain_rel)
+void receiver::set_rf_gain(double gain)
 {
 }
 
@@ -172,6 +175,10 @@ void receiver::connect_all()
     {
         tb->connect(file_src, 0, throttle, 0);
         tb->connect(throttle, 0, filter, 0);
+    }
+    else
+    {
+        tb->connect(usrp_src, 0, filter, 0);
     }
         
     tb->connect(filter, 0, demod, 0);

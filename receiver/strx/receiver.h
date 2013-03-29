@@ -36,6 +36,7 @@
 #include <filter/single_pole_iir_filter_ff.h>
 #include <gr_complex.h>
 #include <gr_top_block.h>
+#include <uhd/usrp_source.h>
 
 
 /*! \defgroup RX High level receiver blocks. */
@@ -62,11 +63,11 @@ public:
     void set_input_device(const std::string device);
     void set_output_device(const std::string device);
 
-    void set_rf_freq(double freq_hz);
+    void set_rf_freq(double freq);
     double rf_freq(void);
     void rf_range(double *start, double *stop, double *step);
 
-    void set_rf_gain(double gain_rel);
+    void set_rf_gain(double gain);
     double rf_gain(void);
 
     void set_filter(double low, double high, double trans_width);
@@ -87,6 +88,7 @@ private:
 
     gr_top_block_sptr tb;  /*!< Receiver top block. */
     
+    gr::uhd::usrp_source::sptr                  usrp_src;  /*!< USRP source. */
     gr::blocks::file_source::sptr               file_src;  /*!< I/Q file source. */
     gr::blocks::throttle::sptr                  throttle;  /*!< Rate limiter for file sources. */
     std::vector<gr_complex>                     taps;

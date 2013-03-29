@@ -76,7 +76,7 @@ int main(int argc, char **argv)
         ("help,h", "This help message")
         ("input,i", po::value<std::string>(&input)->default_value(""), "USRP sub device or I/Q file (use file:/path/to/file)")
         ("freq,f", po::value<std::string>(&freq_str), "RF frequency in Hz or using G, M, k suffix")
-        ("gain,g", po::value<double>(&gain), "RF/IF gain (relative scale 0..100)")
+        ("gain,g", po::value<double>(&gain), "RF/IF gain in dB")
         ("output,o", po::value<std::string>(&output)->default_value(""), "Output file (use stdout if omitted)")
     ;
     po::variables_map vm;
