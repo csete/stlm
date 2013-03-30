@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /*
- * Copyright (C) 2013 Alexandru Csete, OZ9AEC
+ * Copyright 2013 Alexandru Csete, OZ9AEC
  *
  * Strx is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,27 +34,12 @@
  */
 receiver::receiver(const std::string input, const std::string output, double quad_rate)
     : d_running(false),
-      d_quad_rate(quad_rate),
-      d_rf_freq(0.0)
+      d_quad_rate(quad_rate)
 {
-    // Check input type
-    if (input.find("file:") != std::string::npos)
-    {
-        input_type = INPUT_TYPE_FILE;
-        std::string filename = input.substr(5);
-        file_src = gr::blocks::file_source::make(sizeof(gr_complex), filename.c_str(), true);
-        throttle = gr::blocks::throttle::make(sizeof(gr_complex), d_quad_rate);
-    }
-    else
-    {
-        input_type = INPUT_TYPE_UHD;
-        usrp_src = gr::uhd::usrp_source::make(uhd::device_addr_t(""), uhd::io_type_t::COMPLEX_FLOAT32, 1);
-        usrp_src->set_samp_rate(d_quad_rate);
-        if (!input.empty())
-            usrp_src->set_subdev_spec(input);
-    }
 
     tb = gr_make_top_block("strx");
+    
+    src = strx_make_source_c(input, d_quad_rate);
 
     taps = gr::filter::firdes::complex_band_pass(1.0, d_quad_rate, -400e3, 400.3e3, 900.e3);
     filter = gr::filter::fft_filter_ccc::make(1, taps);
@@ -145,8 +130,7 @@ void receiver::set_output_device(const std::string device)
 
 void receiver::set_antenna(std::string antenna)
 {
-    if (input_type == INPUT_TYPE_UHD)
-        usrp_src->set_antenna(antenna);
+    src->set_antenna(antenna);
 }
 
 /*! Set new RF frequency.
@@ -156,11 +140,7 @@ void receiver::set_antenna(std::string antenna)
  */
 void receiver::set_rf_freq(double freq_hz)
 {
-    if (input_type == INPUT_TYPE_UHD)
-    {
-        usrp_src->set_center_freq(freq_hz);
-        d_rf_freq = usrp_src->get_center_freq();
-    }
+    src->set_freq(freq_hz);
 }
 
 /*! Get current RF frequency.
@@ -168,10 +148,7 @@ void receiver::set_rf_freq(double freq_hz)
  */
 double receiver::rf_freq(void)
 {
-    if (input_type == INPUT_TYPE_UHD)
-        return usrp_src->get_center_freq();
-    else
-        return 0.0;
+    return src->get_freq();
 }
 
 /*! Get RF frequency range for the current device
@@ -181,13 +158,7 @@ double receiver::rf_freq(void)
  */
 void receiver::rf_freq_range(double *start, double *stop, double *step)
 {
-    if (input_type == INPUT_TYPE_UHD)
-    {
-        uhd::freq_range_t range = usrp_src->get_freq_range();
-        *start = range.start();
-        *stop = range.stop();
-        *step = range.step();
-    }
+    src->get_freq_range(start, stop, step);
 }
 
 /*! Set new RF gain.
@@ -197,8 +168,7 @@ void receiver::rf_freq_range(double *start, double *stop, double *step)
  */
 void receiver::set_rf_gain(double gain)
 {
-    if (input_type == INPUT_TYPE_UHD)
-        usrp_src->set_gain(gain);
+    src->set_gain(gain);
 }
 
 /*! Get current RF gain.
@@ -206,10 +176,7 @@ void receiver::set_rf_gain(double gain)
  */
 double receiver::rf_gain(void)
 {
-    if (input_type == INPUT_TYPE_UHD)
-        return usrp_src->get_gain();
-    else
-        return 0.0;
+    return src->get_gain();
 }
 
 /*! Get gain range for current USRP device.
@@ -219,13 +186,7 @@ double receiver::rf_gain(void)
  */
 void receiver::rf_gain_range(double *start, double *stop, double *step)
 {
-    if (input_type == INPUT_TYPE_UHD)
-    {
-        uhd::gain_range_t range = usrp_src->get_gain_range();
-        *start = range.start();
-        *stop = range.stop();
-        *step = range.step();
-    }
+    src->get_gain_range(start, stop, step);
 }
 
 void receiver::set_filter(double low, double high, double trans_width)
@@ -235,15 +196,7 @@ void receiver::set_filter(double low, double high, double trans_width)
 /*! Connect all blocks in the receiver chain. */
 void receiver::connect_all()
 {
-    if (input_type == INPUT_TYPE_FILE)
-    {
-        tb->connect(file_src, 0, throttle, 0);
-        tb->connect(throttle, 0, filter, 0);
-    }
-    else
-    {
-        tb->connect(usrp_src, 0, filter, 0);
-    }
+    tb->connect(src, 0, filter, 0);
         
     tb->connect(filter, 0, demod, 0);
     tb->connect(demod, 0, iir, 0);

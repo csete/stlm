@@ -4,7 +4,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(strx CXX C)
 set(strx_VERSION_MAJOR 0)
-set(strx_VERSION_MINOR 2)
+set(strx_VERSION_MINOR 3)
 add_definitions(-DVERSION="${strx_VERSION_MAJOR}.${strx_VERSION_MINOR}")
 
 # select the release build type by default to get optimization flags
@@ -130,11 +130,14 @@ set(gr_link_libs
 
 set(strx_HDRS
     strx/receiver.h
+    strx/strx_source_c.h
+    strx/strx_source_c_impl.h
 )
 
 set(strx_SRCS
     strx/receiver.cpp
     strx/strx.cpp
+    strx/strx_source_c_impl.cpp
 )
 
 add_executable(strx ${strx_SRCS})

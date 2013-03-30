@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /*
- * Copyright (C) 2013 Alexandru Csete, OZ9AEC
+ * Copyright 2013 Alexandru Csete, OZ9AEC
  *
  * Strx is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,17 +26,16 @@
 // GNU Radio includes
 #include <analog/quadrature_demod_cf.h>
 #include <blocks/file_sink.h>
-#include <blocks/file_source.h>
-#include <blocks/null_sink.h>
 #include <blocks/sub_ff.h>
-#include <blocks/throttle.h>
 #include <digital/clock_recovery_mm_ff.h>
 #include <filter/fft_filter_ccc.h>
 #include <filter/firdes.h>
 #include <filter/single_pole_iir_filter_ff.h>
 #include <gr_complex.h>
 #include <gr_top_block.h>
-#include <uhd/usrp_source.h>
+
+// strx includes
+#include "strx_source_c.h"
 
 
 /*! \defgroup RX High level receiver blocks. */
@@ -91,21 +90,18 @@ private:
 
     gr_top_block_sptr tb;  /*!< Receiver top block. */
     
-    gr::uhd::usrp_source::sptr                  usrp_src;  /*!< USRP source. */
-    gr::blocks::file_source::sptr               file_src;  /*!< I/Q file source. */
-    gr::blocks::throttle::sptr                  throttle;  /*!< Rate limiter for file sources. */
+    strx_source_c_sptr                         src;    /*!> Input source. */
     std::vector<gr_complex>                     taps;
-    gr::filter::fft_filter_ccc::sptr            filter;    /*!< Channel filter. */
-    gr::analog::quadrature_demod_cf::sptr       demod;     /*!< Demodulator. */
-    gr::filter::single_pole_iir_filter_ff::sptr iir;       /*!< IIR filter for carrier offset estimation. */
-    gr::blocks::sub_ff::sptr                    sub;       /*!< Carrier offset correction. */
+    gr::filter::fft_filter_ccc::sptr            filter; /*!< Channel filter. */
+    gr::analog::quadrature_demod_cf::sptr       demod;  /*!< Demodulator. */
+    gr::filter::single_pole_iir_filter_ff::sptr iir;    /*!< IIR filter for carrier offset estimation. */
+    gr::blocks::sub_ff::sptr                    sub;    /*!< Carrier offset correction. */
     
     gr::digital::clock_recovery_mm_ff::sptr clock_recov;
     gr::blocks::file_sink::sptr fifo;
 
     bool d_running;
     double d_quad_rate;
-    double d_rf_freq;
 };
 
 #endif // RECEIVER_H
