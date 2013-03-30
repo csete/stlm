@@ -36,7 +36,7 @@ public:
   
     void set_gain(double gain);
     double get_gain(void);
-    void   get_gain_range(double *start, double *stop, double *step);
+    void get_gain_range(double *start, double *stop, double *step);
     
     void set_antenna(std::string antenna);
 

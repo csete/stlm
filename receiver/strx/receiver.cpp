@@ -89,45 +89,6 @@ void receiver::stop()
     }
 }
 
-/*! \brief Select new input device.
- *
- * \bug When using ALSA, program will crash if the new device
- *      is the same as the previously used device:
- *      audio_alsa_source[hw:1]: Device or resource busy
- */
-void receiver::set_input_device(const std::string device)
-{
-    /*
-    if (device.empty())
-        return;
-
-    if (input_devstr.compare(device) == 0)
-    {
-        return;
-    }
-
-    tb->lock();
-
-    tb->unlock();
-    */
-}
-
-
-/*! \brief Select new audio output device. */
-void receiver::set_output_device(const std::string device)
-{
-    /*
-    if (output_devstr.compare(device) == 0)
-    {
-        return;
-    }
-
-    tb->lock();
-
-    tb->unlock();
-    */
-}
-
 void receiver::set_antenna(std::string antenna)
 {
     src->set_antenna(antenna);
@@ -135,8 +96,6 @@ void receiver::set_antenna(std::string antenna)
 
 /*! Set new RF frequency.
  * \param freq_hz The new frequency in Hz.
- *
- * This function has no effect when using an I/Q file as input.
  */
 void receiver::set_rf_freq(double freq_hz)
 {
@@ -154,7 +113,7 @@ double receiver::rf_freq(void)
 /*! Get RF frequency range for the current device
  * \param[out] start The lower end of the frequency range.
  * \param[out] stop The upper end of the frequency range.
- * \param[out] step ???
+ * \param[out] step Not used
  */
 void receiver::rf_freq_range(double *start, double *stop, double *step)
 {
@@ -163,8 +122,6 @@ void receiver::rf_freq_range(double *start, double *stop, double *step)
 
 /*! Set new RF gain.
  * \param gain The new gain in dB.
- *
- * This function has no effect when using an I/Q file input.
  */
 void receiver::set_rf_gain(double gain)
 {
@@ -172,7 +129,7 @@ void receiver::set_rf_gain(double gain)
 }
 
 /*! Get current RF gain.
- * \returns The current RF gain or 0 if using an I/Q file as input.
+ * \returns The current RF gain.
  */
 double receiver::rf_gain(void)
 {
@@ -182,7 +139,7 @@ double receiver::rf_gain(void)
 /*! Get gain range for current USRP device.
  * \param[out] start The lower limit of the gain range.
  * \param[out] stop The upper limit of the gain range.
- * \param[out] step ???
+ * \param[out] step Not used
  */
 void receiver::rf_gain_range(double *start, double *stop, double *step)
 {
