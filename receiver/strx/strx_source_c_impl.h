@@ -20,6 +20,7 @@
 #ifndef INCLUDED_STRX_SOURCE_C_IMPL_H
 #define INCLUDED_STRX_SOURCE_C_IMPL_H
 
+#include <config.h>
 #include <blocks/file_source.h>
 #include <blocks/throttle.h>
 #include <uhd/usrp_source.h>
@@ -33,12 +34,14 @@ public:
     void get_freq_range(double *start, double *stop, double *step);
     void set_freq(double freq);
     double get_freq(void);
-  
+
     void set_gain(double gain);
     double get_gain(void);
     void get_gain_range(double *start, double *stop, double *step);
-    
+
     void set_antenna(std::string antenna);
+
+    void setup_rpc(void);
 
 private:
     strx_source_c_impl(const std::string input = "", double quad_rate=2.0e6);

@@ -19,8 +19,12 @@
  */
 
 #include "strx_source_c_impl.h"
+
+#include <config.h>
 #include <gr_io_signature.h>
 #include <gruel/attributes.h>
+#include <rpcregisterhelpers.h>
+
 
 /* Create a new instance of fcd_source_c_impl and return
  * an upcasted boost shared_ptr. This is effectively the public constructor.
@@ -59,7 +63,6 @@ strx_source_c_impl::strx_source_c_impl(const std::string input, double quad_rate
             
         connect(usrp_src, 0, self(), 0);
     }
-
 }
 
 void strx_source_c_impl::set_freq(double freq)
@@ -119,4 +122,54 @@ void strx_source_c_impl::set_antenna(std::string antenna)
 {
     if (input_type == INPUT_TYPE_UHD)
         usrp_src->set_antenna(antenna);
+}
+
+void strx_source_c_impl::setup_rpc(void)
+{
+#ifdef GR_CTRLPORT
+    double start, stop, step;
+
+    // Frequency
+    get_freq_range(&start, &stop, &step);
+    add_rpc_variable(
+        rpcbasic_sptr(new rpcbasic_register_get<strx_source_c, double>(
+            alias(), "Frequency",
+            &strx_source_c::get_freq,
+            pmt::mp(start), pmt::mp(stop), pmt::mp((stop-start)/2.0),
+            "Hz", "Get frequency",
+            RPC_PRIVLVL_MIN, DISPNULL)
+        )
+    );
+    add_rpc_variable(
+        rpcbasic_sptr(new rpcbasic_register_set<strx_source_c, double>(
+            alias(), "Frequency",
+            &strx_source_c::set_freq,
+            pmt::mp(start), pmt::mp(stop), pmt::mp((stop-start)/2.0),
+            "Hz", "Set frequency",
+            RPC_PRIVLVL_MIN, DISPNULL)
+        )
+    );
+
+    // Gain
+    get_gain_range(&start, &stop, &step);
+    /*add_rpc_variable(
+        rpcbasic_sptr(new rpcbasic_register_get<strx_source_c, double>(
+            alias(), "Gain",
+            &strx_source_c::get_gain,
+            pmt::mp(start), pmt::mp(stop), pmt::mp((stop-start)/2.0),
+            "dB", "Get gain",
+            RPC_PRIVLVL_MIN, DISPNULL)
+        )
+    );*/
+    add_rpc_variable(
+        rpcbasic_sptr(new rpcbasic_register_set<strx_source_c, double>(
+            alias(), "Gain",
+            &strx_source_c::set_gain,
+            pmt::mp(start), pmt::mp(stop), pmt::mp((stop-start)/2.0),
+            "dB", "Set gain",
+            RPC_PRIVLVL_MIN, DISPNULL)
+        )
+    );
+
+#endif
 }
