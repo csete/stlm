@@ -17,7 +17,9 @@
  * the Free Software Foundation, Inc., 51 Franklin Street,
  * Boston, MA 02110-1301, USA.
  */
- #include "receiver.h"
+
+#include <rpcregisterhelpers.h>
+#include "receiver.h"
 
 
 /*! \brief Public contructor.
@@ -32,9 +34,9 @@
  */
 receiver::receiver(const std::string input, const std::string output, double quad_rate)
     : d_running(false),
-      d_quad_rate(quad_rate)
+      d_quad_rate(quad_rate),
+      d_rf_freq(0.0)
 {
-    
     // Check input type
     if (input.find("file:") != std::string::npos)
     {
@@ -70,6 +72,7 @@ receiver::receiver(const std::string input, const std::string output, double qua
         fifo = gr::blocks::file_sink::make(sizeof(float), output.c_str());
     }
 
+    setup_ctrlport();
     connect_all();
 }
 
@@ -155,7 +158,10 @@ void receiver::set_antenna(std::string antenna)
 void receiver::set_rf_freq(double freq_hz)
 {
     if (input_type == INPUT_TYPE_UHD)
+    {
         usrp_src->set_center_freq(freq_hz);
+        d_rf_freq = usrp_src->get_center_freq();
+    }
 }
 
 /*! Get current RF frequency.

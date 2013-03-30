@@ -105,7 +105,7 @@ private:
 
     bool d_running;
     double d_quad_rate;
-
+    double d_rf_freq;
 };
 
 #endif // RECEIVER_H
