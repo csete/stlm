@@ -72,7 +72,6 @@ receiver::receiver(const std::string input, const std::string output, double qua
         fifo = gr::blocks::file_sink::make(sizeof(float), output.c_str());
     }
 
-    setup_ctrlport();
     connect_all();
 }
 
