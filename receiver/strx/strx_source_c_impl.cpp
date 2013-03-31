@@ -26,7 +26,7 @@
 #include <rpcregisterhelpers.h>
 
 
-/* Create a new instance of fcd_source_c_impl and return
+/* Create a new instance of strx_source_c_impl and return
  * an upcasted boost shared_ptr. This is effectively the public constructor.
  */
 strx_source_c_sptr strx_make_source_c(const std::string input, double quad_rate)
