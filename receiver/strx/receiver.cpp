@@ -39,7 +39,7 @@ receiver::receiver(const std::string input, const std::string output, double qua
 
     tb = gr_make_top_block("strx");
     
-    src = strx_make_source_c(input, d_quad_rate);
+    src = strx::source_c::make(input, d_quad_rate);
 
     taps = gr::filter::firdes::complex_band_pass(1.0, d_quad_rate, -400e3, 400.3e3, 900.e3);
     filter = gr::filter::fft_filter_ccc::make(1, taps);

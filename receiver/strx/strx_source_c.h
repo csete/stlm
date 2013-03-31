@@ -24,60 +24,68 @@
 #include <gr_hier_block2.h>
 #include "strx_api.h"
 
-class strx_source_c;
 
-typedef boost::shared_ptr<strx_source_c> strx_source_c_sptr;
 
-/*! Return a shared_ptr to a new instance of strx_source_c. */
-STRX_API strx_source_c_sptr strx_make_source_c(const std::string input="", double quad_rate=2.0e6);
+namespace strx {
 
-/*! Strx source block. */
-class STRX_API strx_source_c : virtual public gr_hier_block2
-{
-public:
-
-    /*! Set new RF frequency.
-     * \param freq The new frequency in Hz.
+    /*! \brief Strx source block.
      *
-     * This function has no effect when using an I/Q file input.
+     * This block provides an input source for the Sapphire telemetry reciever.
+     * The input source can be either a USRP saource or a file source with a throttle.
      */
-    virtual void set_freq(double freq) = 0;
+    class STRX_API source_c : virtual public gr_hier_block2
+    {
+    public:
 
-    /*! Get current RF frequency.
-     * \returns The current RF frequency in Hz or 0 if using a file source.
-     */
-    virtual double get_freq() = 0;
+        typedef boost::shared_ptr<source_c> sptr;
 
-    /*! Get RF frequency range.
-     * \param[out] start The lower end of the frequency range.
-     * \param[out] stop The upper end of the frequency range.
-     * \param[out] step Not used.
-     */
-    virtual void get_freq_range(double *start, double *stop, double *step) = 0;
+        /*! \brief Return a shared_ptr to a new instance of strx::source_c. */
+        static sptr make(const std::string input="", double quad_rate=2.0e6);
 
-    /*! Set tuner gain.
-     * \param gain The new tuner gain in dB.
-     * 
-     * This function has no effect when using an I/Q file input.
-     */
-    virtual void set_gain(double gain) = 0;
+        /*! \brief Set new RF frequency.
+         *  \param freq The new frequency in Hz.
+         *
+         * This function has no effect when using an I/Q file input.
+         */
+        virtual void set_freq(double freq) = 0;
 
-    /*! Get current tuner gain.
-     * \return The current tuner gain in dB or 0 if using a file source.
-     */
-    virtual double get_gain() = 0;
+        /*! \brief Get current RF frequency.
+         *  \returns The current RF frequency in Hz or 0 if using a file source.
+         */
+        virtual double get_freq() = 0;
 
-    /*! Get tuner gain range.
-     * \param[out] start The lower end of the gain range.
-     * \param[out] stop The upper end of the gain range.
-     * \param[out] step Not used.
-     */
-    virtual void get_gain_range(double *start, double *stop, double *step) = 0;
+        /*! \brief Get RF frequency range.
+         *  \param[out] start The lower end of the frequency range.
+         *  \param[out] stop The upper end of the frequency range.
+         *  \param[out] step Not used.
+         */
+        virtual void get_freq_range(double *start, double *stop, double *step) = 0;
 
-    /*! Select antenna.
-     * \param antenna String describing the antenna, e.g. "RX2".
-     */
-    virtual void set_antenna(std::string antenna) = 0;
-};
+        /*! Set tuner gain.
+         * \param gain The new tuner gain in dB.
+         *
+         * This function has no effect when using an I/Q file input.
+         */
+        virtual void set_gain(double gain) = 0;
+
+        /*! \brief Get current tuner gain.
+         *  \return The current tuner gain in dB or 0 if using a file source.
+         */
+        virtual double get_gain() = 0;
+
+        /*! \brief Get tuner gain range.
+         *  \param[out] start The lower end of the gain range.
+         *  \param[out] stop The upper end of the gain range.
+         *  \param[out] step Not used.
+         */
+        virtual void get_gain_range(double *start, double *stop, double *step) = 0;
+
+        /*! \brief Select antenna.
+         *  \param antenna String describing the antenna, e.g. "RX2".
+         */
+        virtual void set_antenna(std::string antenna) = 0;
+    };
+
+} // namespace strx
 
 #endif /* INCLUDED_STRX_SOURCE_C_H */

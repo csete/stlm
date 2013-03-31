@@ -87,7 +87,7 @@ private:
 
     gr_top_block_sptr tb;  /*!< Receiver top block. */
     
-    strx_source_c_sptr                         src;    /*!> Input source. */
+    strx::source_c::sptr                        src;    /*!> Input source. */
     std::vector<gr_complex>                     taps;
     gr::filter::fft_filter_ccc::sptr            filter; /*!< Channel filter. */
     gr::analog::quadrature_demod_cf::sptr       demod;  /*!< Demodulator. */
