@@ -152,7 +152,7 @@ void strx_source_c_impl::setup_rpc(void)
 
     // Gain
     get_gain_range(&start, &stop, &step);
-    /*add_rpc_variable(
+    add_rpc_variable(
         rpcbasic_sptr(new rpcbasic_register_get<strx_source_c, double>(
             alias(), "Gain",
             &strx_source_c::get_gain,
@@ -160,7 +160,7 @@ void strx_source_c_impl::setup_rpc(void)
             "dB", "Get gain",
             RPC_PRIVLVL_MIN, DISPNULL)
         )
-    );*/
+    );
     add_rpc_variable(
         rpcbasic_sptr(new rpcbasic_register_set<strx_source_c, double>(
             alias(), "Gain",
