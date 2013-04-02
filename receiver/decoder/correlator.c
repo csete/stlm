@@ -4,6 +4,57 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <unistd.h>
+#include <string.h>
+
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+
+void write_socket (int sockno, int length, char *data)
+{
+	static int 	sockets [2] = {-1, -1};;
+	int		x;
+
+	if (sockets [sockno] < 0) {
+		/* Have to open the socket first. */
+		int fd;
+		fd = socket (AF_INET, SOCK_STREAM, 0);
+		if (fd >= 0) {
+			struct sockaddr_in	in;
+			int			v;
+			memset (&in, 0, sizeof (in));
+			in.sin_family = AF_INET;
+			x = inet_aton ("192.168.254.50", &in.sin_addr);
+			if (x < 0) {
+				perror ("inet_aton:");
+				exit (1);
+			}
+			in.sin_port = htons (4001 + sockno);
+			x = connect (fd, (struct sockaddr *) &in, sizeof (in));
+			if (x < 0) {
+				perror ("connect");
+				exit (1);
+			}
+
+			/* Make socket non-blocking. */
+			v = fcntl (fd, F_GETFL, 0);
+			v = v | O_NONBLOCK;
+			x = fcntl (fd, F_SETFL, v);
+
+			sockets [sockno] = fd;
+		}
+	}
+
+	if (sockets [sockno] >= 0) {
+		x = send (sockets [sockno], data, length, 0);
+		if (x < 0) {
+			close (sockets [sockno]);
+			sockets [sockno] = -1;
+		}
+	}
+}
+
 
 int main (int argc, char **argv)
 {
@@ -36,7 +87,7 @@ int main (int argc, char **argv)
 			delta = sr ^ flag;
 
 			if (delta == 0) {
-				printf ("\nFlag fundet efter %d  ", pbit);
+				//printf ("\nFlag fundet efter %d  ", pbit);
 				pbit = 0;
 				hunting = 0;
 				bufin = 0;
@@ -51,11 +102,22 @@ int main (int argc, char **argv)
 				}
 				bufin++;
 				if (bufin >= plength) {
-					printf ("Len: %3d  seq: %3d  CRC: %04X", databuf [0], databuf [1], (databuf [2]<<8) | databuf [3]);
-					printf ("  Packet:");
-					for (x = 0; x  < bufin; x++) {
-						printf (" %02X", databuf [x]);
-					}
+					//if (databuf [4] != 1) {
+						printf ("Len: %3d  seq: %3d  CRC: %04X", databuf [0], databuf [1], (databuf [2]<<8) | databuf [3]);
+						printf ("  Packet:");
+						for (x = 0; x  < bufin; x++) {
+							printf (" %02X", databuf [x]);
+						}
+						printf ("\n");
+
+						/* Deliver data to network socket. */
+						if (databuf [4] == 0x11 || databuf [4] == 0x13) {
+							write_socket (0, plength - 5, &databuf [5]);
+						}
+						if (databuf [4] == 0x12 || databuf [4] == 0x14) {
+							write_socket (1, plength - 5, &databuf [5]);
+						}
+					//}
 					hunting = 1;
 				}
 			}
