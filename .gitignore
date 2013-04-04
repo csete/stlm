@@ -1,1 +1,7 @@
 receiver/build
+receiver/strx-mon/gnuradio.cpp
+receiver/strx-mon/gnuradio.h
+receiver/strx-mon/gnuradio.o
+receiver/strx-mon/strx-mon
+receiver/strx-mon/strx-mon.o
+
