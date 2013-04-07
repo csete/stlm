@@ -17,8 +17,9 @@
  * the Free Software Foundation, Inc., 51 Franklin Street,
  * Boston, MA 02110-1301, USA.
  */
-
+#ifdef GR_CTRLPORT
 #include <rpcregisterhelpers.h>
+#endif
 #include "receiver.h"
 
 
@@ -38,7 +39,7 @@ receiver::receiver(const std::string input, const std::string output, double qua
 {
 
     tb = gr_make_top_block("strx");
-    
+
     src = strx::source_c::make(input, d_quad_rate);
 
     taps = gr::filter::firdes::complex_band_pass(1.0, d_quad_rate, -400e3, 400.3e3, 900.e3);
@@ -56,6 +57,21 @@ receiver::receiver(const std::string input, const std::string output, double qua
     {
         fifo = gr::blocks::file_sink::make(sizeof(float), output.c_str());
     }
+
+#ifdef GR_CTRLPORT
+    add_rpc_variable(rpcbasic_sptr(new
+        rpcbasic_register_get<receiver, double>(
+                "receiver",   // const std::string& name,
+                "frequency",  // const char* functionbase,
+                this,      // T* obj,
+                &receiver::rf_freq, // Tfrom (T::*function)(),
+                pmt::mp(50.0e6), pmt::mp(2.0e9), pmt::mp(100.0e6),
+                "Hz", // const char* units_ = "",
+                "RF frequency", // const char* desc_ = "",
+                RPC_PRIVLVL_MIN,
+                DISPNULL)
+        ));
+#endif
 
     connect_all();
 }

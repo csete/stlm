@@ -27,16 +27,19 @@
 #include <analog/quadrature_demod_cf.h>
 #include <blocks/file_sink.h>
 #include <blocks/sub_ff.h>
+#include <config.h>
 #include <digital/clock_recovery_mm_ff.h>
 #include <filter/fft_filter_ccc.h>
 #include <filter/firdes.h>
 #include <filter/single_pole_iir_filter_ff.h>
 #include <gr_complex.h>
 #include <gr_top_block.h>
+#ifdef GR_CTRLPORT
+#include <rpcregisterhelpers.h>
+#endif
 
 // strx includes
 #include "strx_source_c.h"
-
 
 /*! \defgroup RX High level receiver blocks. */
 
@@ -73,6 +76,16 @@ public:
 
 private:
     void connect_all(void);
+
+#ifdef GR_CTRLPORT
+protected:
+    std::vector<boost::any> d_rpc_vars;
+public:
+    void add_rpc_variable(rpcbasic_sptr s)
+    {
+        d_rpc_vars.push_back(s);
+    }
+#endif
 
 private:
 
