@@ -51,6 +51,7 @@ int main(int argc, char* argv[])
             case KNOBDOUBLE:
                 knobd = static_cast<KnobDPtr>(knob); // can also use: KnobPtr::dynamicCast(knob);
                 cout << knobd->value << endl;
+                knobd->value += 5.0;
                 break;
 
             default:
@@ -58,6 +59,8 @@ int main(int argc, char* argv[])
             }
         }
 
+        knob_map.erase("strx0::max nouptut_items");
+        ctrlport->set(knob_map);
     }
     catch (const Ice::Exception& ex)
     {
