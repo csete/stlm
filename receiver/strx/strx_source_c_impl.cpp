@@ -132,19 +132,19 @@ namespace strx {
         get_freq_range(&start, &stop, &step);
         add_rpc_variable(
             rpcbasic_sptr(new rpcbasic_register_get<source_c, double>(
-                alias(), "Frequency",
+                alias(), "frequency",
                 &source_c::get_freq,
                 pmt::mp(start), pmt::mp(stop), pmt::mp((stop-start)/2.0),
-                "Hz", "Get frequency",
+                "Hz", "RF frequency",
                 RPC_PRIVLVL_MIN, DISPNULL)
             )
         );
         add_rpc_variable(
             rpcbasic_sptr(new rpcbasic_register_set<source_c, double>(
-                alias(), "Frequency",
+                alias(), "frequency",
                 &source_c::set_freq,
                 pmt::mp(start), pmt::mp(stop), pmt::mp((stop-start)/2.0),
-                "Hz", "Set frequency",
+                "Hz", "RF frequency",
                 RPC_PRIVLVL_MIN, DISPNULL)
             )
         );
@@ -153,19 +153,19 @@ namespace strx {
         get_gain_range(&start, &stop, &step);
         add_rpc_variable(
             rpcbasic_sptr(new rpcbasic_register_get<source_c, double>(
-                alias(), "Gain",
+                alias(), "gain",
                 &source_c::get_gain,
                 pmt::mp(start), pmt::mp(stop), pmt::mp((stop-start)/2.0),
-                "dB", "Get gain",
+                "dB", "RF gain",
                 RPC_PRIVLVL_MIN, DISPNULL)
             )
         );
         add_rpc_variable(
             rpcbasic_sptr(new rpcbasic_register_set<source_c, double>(
-                alias(), "Gain",
+                alias(), "gain",
                 &source_c::set_gain,
                 pmt::mp(start), pmt::mp(stop), pmt::mp((stop-start)/2.0),
-                "dB", "Set gain",
+                "dB", "RF gain",
                 RPC_PRIVLVL_MIN, DISPNULL)
             )
         );
