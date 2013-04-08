@@ -21,7 +21,7 @@
 #ifndef INCLUDED_STRX_API_H
 #define INCLUDED_STRX_API_H
 
-#include <gruel/attributes.h>
+#include <gnuradio/attributes.h>
 
 #ifdef gnuradio_strx_EXPORTS
 #  define STRX_API __GR_ATTR_EXPORT

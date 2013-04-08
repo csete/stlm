@@ -21,8 +21,8 @@
 #include "strx_source_c_impl.h"
 
 #include <config.h>
+#include <gnuradio/attributes.h>
 #include <gr_io_signature.h>
-#include <gruel/attributes.h>
 #include <rpcregisterhelpers.h>
 
 

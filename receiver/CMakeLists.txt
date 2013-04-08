@@ -39,7 +39,6 @@ endif(CMAKE_COMPILER_IS_GNUCXX)
 
 include(GrBoost)
 
-find_package(Gruel)
 find_package(GnuradioRuntime)
 find_package(GnuradioBlocks)
 find_package(UHD)
@@ -48,10 +47,6 @@ find_package(GnuradioFilter)
 find_package(GnuradioAnalog)
 find_package(GnuradioDigital)
 find_package(GnuradioAudio)
-
-if (NOT GRUEL_FOUND)
-    message(FATAL_ERROR "gruel 3.7 or later is required to compile strx")
-endif()
 
 if (NOT GNURADIO_RUNTIME_FOUND)
     message(FATAL_ERROR "gnuradio-runtime 3.7 or later is required to compile strx")
@@ -91,7 +86,6 @@ endif()
 ########################################################################
 include_directories(
     ${Boost_INCLUDE_DIRS}
-    ${GRUEL_INCLUDE_DIRS}
     ${GNURADIO_RUNTIME_INCLUDE_DIRS}
     ${GNURADIO_BLOCKS_INCLUDE_DIRS}
     ${UHD_INCLUDE_DIRS}
@@ -104,7 +98,6 @@ include_directories(
 
 link_directories(
     ${Boost_LIBRARY_DIRS}
-    ${GRUEL_LIBRARY_DIRS}
     ${GNURADIO_RUNTIME_LIBRARY_DIRS}
     ${GNURADIO_BLOCKS_LIBRARY_DIRS}
     ${UHD_LIBRARY_DIRS}
@@ -117,7 +110,6 @@ link_directories(
 
 set(gr_link_libs
     ${Boost_LIBRARIES}
-    ${GRUEL_LIBRARIES}
     ${GNURADIO_RUNTIME_LIBRARIES}
     ${GNURADIO_BLOCKS_LIBRARIES}
     ${UHD_LIBRARIES}
