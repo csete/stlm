@@ -69,12 +69,14 @@ int main(int argc, char **argv)
     double freq;
     double gain;
     bool clierr=false;
+    std::string rxname;
     std::string input;
     std::string output;
 
     po::options_description desc("Command line options");
     desc.add_options()
         ("help,h", "This help message")
+        ("name,n", po::value<std::string>(&rxname)->default_value(""), "Receiver name (used for ctrlport)")
         ("input,i", po::value<std::string>(&input)->default_value(""), "USRP sub device or I/Q file (use file:/path/to/file)")
         ("ant,a", po::value<std::string>(&ant_str), "Select USRP antenna (e.g. RX2)")
         ("freq,f", po::value<std::string>(&freq_str), "RF frequency in Hz or using G, M, k suffix")
@@ -99,7 +101,7 @@ int main(int argc, char **argv)
     }
 
     // create receiver and set paarameters
-    rx = new receiver(input, output);
+    rx = new receiver(rxname, input, output);
 
     if (vm.count("freq"))
     {

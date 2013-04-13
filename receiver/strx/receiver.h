@@ -58,7 +58,7 @@ class receiver
 
 public:
 
-    receiver(const std::string input="", const std::string output="", double quad_rate=2.e6);
+    receiver(const std::string name="strx", const std::string input="", const std::string output="", double quad_rate=2.e6);
     ~receiver();
 
     void start();
@@ -112,6 +112,7 @@ private:
     digital::clock_recovery_mm_ff::sptr clock_recov;
     blocks::file_sink::sptr fifo;
 
+    std::string d_name; /*!< Receiver name. */
     bool d_running;
     double d_quad_rate;
 };

@@ -24,6 +24,7 @@
 
 
 /*! \brief Public contructor.
+ *  \param name The receiver name. Used for ctrlport names.
  *  \param input Input device specifier (see below).
  *  \param output Output file name. Using stdout if empty.
  *  \param quad_rate Quadrature rate in samples per second.
@@ -33,12 +34,17 @@
  * 
  * \todo Use gr-osmosdr as soon as it support gnuradio 3.7
  */
-receiver::receiver(const std::string input, const std::string output, double quad_rate)
+receiver::receiver(const std::string name, const std::string input, const std::string output, double quad_rate)
     : d_running(false),
       d_quad_rate(quad_rate)
 {
 
-    tb = gr_make_top_block("strx");
+    if (name.empty())
+        d_name = "strx";
+    else
+        d_name = name;
+
+    tb = gr_make_top_block(d_name);
 
     src = strx::source_c::make(input, d_quad_rate);
 
@@ -59,9 +65,9 @@ receiver::receiver(const std::string input, const std::string output, double qua
     }
 
 #ifdef GR_CTRLPORT
-    add_rpc_variable(rpcbasic_sptr(new
-        rpcbasic_register_get<receiver, double>(
-                "receiver",   // const std::string& name,
+    add_rpc_variable(rpcbasic_sptr(new rpcbasic_register_get<receiver, double>
+            (
+                d_name,   // const std::string& name,
                 "frequency",  // const char* functionbase,
                 this,      // T* obj,
                 &receiver::rf_freq, // Tfrom (T::*function)(),
@@ -69,8 +75,9 @@ receiver::receiver(const std::string input, const std::string output, double qua
                 "Hz", // const char* units_ = "",
                 "RF frequency", // const char* desc_ = "",
                 RPC_PRIVLVL_MIN,
-                DISPNULL)
-        ));
+                DISPNULL
+            )
+    ));
 #endif
 
     connect_all();
