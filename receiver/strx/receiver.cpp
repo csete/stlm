@@ -42,20 +42,20 @@ receiver::receiver(const std::string input, const std::string output, double qua
 
     src = strx::source_c::make(input, d_quad_rate);
 
-    taps = gr::filter::firdes::low_pass(1.0, d_quad_rate, 400e3, 900.e3);
-    filter = gr::filter::freq_xlating_fir_filter_ccf::make(1, taps, 0.0, d_quad_rate);
-    demod = gr::analog::quadrature_demod_cf::make(1.f);
-    iir = gr::filter::single_pole_iir_filter_ff::make(1.e-3);
-    sub = gr::blocks::sub_ff::make();
-    clock_recov = gr::digital::clock_recovery_mm_ff::make(8.f, 10.e-3f, 10.e-3f, 1.e-3f, 10.e-3f);
+    taps = filter::firdes::low_pass(1.0, d_quad_rate, 400e3, 900.e3);
+    filter = filter::freq_xlating_fir_filter_ccf::make(1, taps, 0.0, d_quad_rate);
+    demod = analog::quadrature_demod_cf::make(1.f);
+    iir = filter::single_pole_iir_filter_ff::make(1.e-3);
+    sub = blocks::sub_ff::make();
+    clock_recov = digital::clock_recovery_mm_ff::make(8.f, 10.e-3f, 10.e-3f, 1.e-3f, 10.e-3f);
 
     if (output.empty())
     {
-        fifo = gr::blocks::file_sink::make(sizeof(float), "/dev/fd/1");
+        fifo = blocks::file_sink::make(sizeof(float), "/dev/fd/1");
     }
     else
     {
-        fifo = gr::blocks::file_sink::make(sizeof(float), output.c_str());
+        fifo = blocks::file_sink::make(sizeof(float), output.c_str());
     }
 
 #ifdef GR_CTRLPORT

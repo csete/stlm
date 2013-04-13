@@ -41,6 +41,8 @@
 // strx includes
 #include "strx_source_c.h"
 
+using namespace gr;
+
 /*! \defgroup RX High level receiver blocks. */
 
 /*! \brief Top-level receiver class.
@@ -100,15 +102,15 @@ private:
 
     gr_top_block_sptr tb;  /*!< Receiver top block. */
     
-    strx::source_c::sptr                          src;    /*!< Input source. */
-    std::vector<float>                           taps;   /*!< Channel filter taps. */
-    gr::filter::freq_xlating_fir_filter_ccf::sptr filter; /*!< Channel filter. */
-    gr::analog::quadrature_demod_cf::sptr         demod;  /*!< Demodulator. */
-    gr::filter::single_pole_iir_filter_ff::sptr   iir;    /*!< IIR filter for carrier offset estimation. */
-    gr::blocks::sub_ff::sptr                      sub;    /*!< Carrier offset correction. */
+    strx::source_c::sptr                      src;    /*!< Input source. */
+    std::vector<float>                       taps;   /*!< Channel filter taps. */
+    filter::freq_xlating_fir_filter_ccf::sptr filter; /*!< Channel filter. */
+    analog::quadrature_demod_cf::sptr         demod;  /*!< Demodulator. */
+    filter::single_pole_iir_filter_ff::sptr   iir;    /*!< IIR filter for carrier offset estimation. */
+    blocks::sub_ff::sptr                      sub;    /*!< Carrier offset correction. */
     
-    gr::digital::clock_recovery_mm_ff::sptr clock_recov;
-    gr::blocks::file_sink::sptr fifo;
+    digital::clock_recovery_mm_ff::sptr clock_recov;
+    blocks::file_sink::sptr fifo;
 
     bool d_running;
     double d_quad_rate;
