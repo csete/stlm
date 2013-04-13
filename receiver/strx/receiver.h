@@ -58,7 +58,7 @@ class receiver
 
 public:
 
-    receiver(const std::string name="strx", const std::string input="", const std::string output="", double quad_rate=2.e6);
+    receiver(const std::string name="", const std::string input="", const std::string output="", double quad_rate=2.e6);
     ~receiver();
 
     void start();
@@ -73,6 +73,9 @@ public:
     void rf_gain_range(double *start, double *stop, double *step);
     void set_rf_gain(double gain);
     double rf_gain(void);
+
+    void set_lo(double lo);
+    double lo(void);
 
     void set_filter(double low, double high, double trans_width);
 

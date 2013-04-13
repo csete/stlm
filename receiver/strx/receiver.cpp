@@ -78,6 +78,35 @@ receiver::receiver(const std::string name, const std::string input, const std::s
                 DISPNULL
             )
     ));
+
+    // Filter offset (aka. receiver LO)
+    add_rpc_variable(rpcbasic_sptr(new rpcbasic_register_get<receiver, double>
+            (
+                d_name,   // const std::string& name,
+                "lo",  // const char* functionbase,
+                this,      // T* obj,
+                &receiver::lo, // Tfrom (T::*function)(),
+                pmt::mp(-d_quad_rate/2.0), pmt::mp(d_quad_rate/2.0), pmt::mp(0.0),
+                "Hz", // const char* units_ = "",
+                "Receiver LO", // const char* desc_ = "",
+                RPC_PRIVLVL_MIN,
+                DISPNULL
+            )
+    ));
+    add_rpc_variable(rpcbasic_sptr(new rpcbasic_register_set<receiver, double>
+            (
+                d_name,   // const std::string& name,
+                "lo",  // const char* functionbase,
+                this,      // T* obj,
+                &receiver::set_lo, // Tfrom (T::*function)(),
+                pmt::mp(-d_quad_rate/2.0), pmt::mp(d_quad_rate/2.0), pmt::mp(0.0),
+                "Hz", // const char* units_ = "",
+                "Receiver LO", // const char* desc_ = "",
+                RPC_PRIVLVL_MIN,
+                DISPNULL
+            )
+    ));
+
 #endif
 
     connect_all();
@@ -167,6 +196,22 @@ double receiver::rf_gain(void)
 void receiver::rf_gain_range(double *start, double *stop, double *step)
 {
     src->get_gain_range(start, stop, step);
+}
+
+/*! Set receiver LO.
+ * \param lo The new LO frequency in Hz.
+ */
+void receiver::set_lo(double lo)
+{
+    filter->set_center_freq(lo);
+}
+
+/*! Get receiver LO.
+ * \returns The current receiver LO frequency in Hz.
+ */
+double receiver::lo(void)
+{
+    return filter->center_freq();
 }
 
 void receiver::set_filter(double low, double high, double trans_width)
