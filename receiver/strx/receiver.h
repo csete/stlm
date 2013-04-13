@@ -29,7 +29,7 @@
 #include <blocks/sub_ff.h>
 #include <config.h>
 #include <digital/clock_recovery_mm_ff.h>
-#include <filter/fft_filter_ccc.h>
+#include <filter/freq_xlating_fir_filter_ccf.h>
 #include <filter/firdes.h>
 #include <filter/single_pole_iir_filter_ff.h>
 #include <gr_complex.h>
@@ -100,12 +100,12 @@ private:
 
     gr_top_block_sptr tb;  /*!< Receiver top block. */
     
-    strx::source_c::sptr                        src;    /*!> Input source. */
-    std::vector<gr_complex>                     taps;
-    gr::filter::fft_filter_ccc::sptr            filter; /*!< Channel filter. */
-    gr::analog::quadrature_demod_cf::sptr       demod;  /*!< Demodulator. */
-    gr::filter::single_pole_iir_filter_ff::sptr iir;    /*!< IIR filter for carrier offset estimation. */
-    gr::blocks::sub_ff::sptr                    sub;    /*!< Carrier offset correction. */
+    strx::source_c::sptr                          src;    /*!< Input source. */
+    std::vector<float>                           taps;   /*!< Channel filter taps. */
+    gr::filter::freq_xlating_fir_filter_ccf::sptr filter; /*!< Channel filter. */
+    gr::analog::quadrature_demod_cf::sptr         demod;  /*!< Demodulator. */
+    gr::filter::single_pole_iir_filter_ff::sptr   iir;    /*!< IIR filter for carrier offset estimation. */
+    gr::blocks::sub_ff::sptr                      sub;    /*!< Carrier offset correction. */
     
     gr::digital::clock_recovery_mm_ff::sptr clock_recov;
     gr::blocks::file_sink::sptr fifo;

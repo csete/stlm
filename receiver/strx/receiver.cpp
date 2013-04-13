@@ -42,8 +42,8 @@ receiver::receiver(const std::string input, const std::string output, double qua
 
     src = strx::source_c::make(input, d_quad_rate);
 
-    taps = gr::filter::firdes::complex_band_pass(1.0, d_quad_rate, -400e3, 400.3e3, 900.e3);
-    filter = gr::filter::fft_filter_ccc::make(1, taps);
+    taps = gr::filter::firdes::low_pass(1.0, d_quad_rate, 400e3, 900.e3);
+    filter = gr::filter::freq_xlating_fir_filter_ccf::make(1, taps, 0.0, d_quad_rate);
     demod = gr::analog::quadrature_demod_cf::make(1.f);
     iir = gr::filter::single_pole_iir_filter_ff::make(1.e-3);
     sub = gr::blocks::sub_ff::make();
