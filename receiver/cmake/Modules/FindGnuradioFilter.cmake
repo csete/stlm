@@ -1,25 +1,5 @@
 INCLUDE(FindPkgConfig)
-PKG_CHECK_MODULES(PC_GNURADIO_FILTER gnuradio-filter>=3.7)
-
-FIND_PATH(
-    GNURADIO_FILTER_INCLUDE_DIRS
-    NAMES gnuradio/filter/api.h
-    HINTS $ENV{GNURADIO_FILTER_DIR}/include
-        ${PC_GNURADIO_FILTER_INCLUDEDIR}
-    PATHS /usr/local/include
-          /usr/include
-)
-
-FIND_LIBRARY(
-    GNURADIO_FILTER_LIBRARIES
-    NAMES gnuradio-filter
-    HINTS $ENV{GNURADIO_FILTER_DIR}/lib
-        ${PC_GNURADIO_FILTER_LIBDIR}
-    PATHS /usr/local/lib
-          /usr/local/lib64
-          /usr/lib
-          /usr/lib64
-)
+PKG_CHECK_MODULES(GNURADIO_FILTER gnuradio-filter>=3.7)
 
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(GNURADIO_FILTER DEFAULT_MSG GNURADIO_FILTER_LIBRARIES GNURADIO_FILTER_INCLUDE_DIRS)
