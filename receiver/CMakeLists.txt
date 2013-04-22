@@ -136,4 +136,4 @@ add_executable(strx ${strx_SRCS})
 target_link_libraries(strx ${gr_link_libs})
 
 # Correlator & decoder
-add_executable(correlator decoder/correlator.c)
+add_executable(correlator decoder/correlator.c decoder/viterbi.h)
