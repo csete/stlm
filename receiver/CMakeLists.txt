@@ -44,6 +44,7 @@ find_package(GnuradioBlocks)
 find_package(UHD)
 find_package(GnuradioUHD)
 find_package(GnuradioFilter)
+find_package(GnuradioFft)
 find_package(GnuradioAnalog)
 find_package(GnuradioDigital)
 find_package(GnuradioAudio)
@@ -66,6 +67,10 @@ endif()
 
 if (NOT GNURADIO_FILTER_FOUND)
     message(FATAL_ERROR "gnuradio-filter 3.7 or later is required to compile strx")
+endif()
+
+if (NOT GNURADIO_FFT_FOUND)
+    message(FATAL_ERROR "gnuradio-fft 3.7 or later is required to compile strx")
 endif()
 
 if (NOT GNURADIO_ANALOG_FOUND)
@@ -91,6 +96,7 @@ include_directories(
     ${UHD_INCLUDE_DIRS}
     ${GNURADIO_UHD_INCLUDE_DIRS}
     ${GNURADIO_FILTER_INCLUDE_DIRS}
+    ${GNURADIO_FFT_INCLUDE_DIRS}
     ${GNURADIO_ANALOG_INCLUDE_DIRS}
     ${GNURADIO_DIGITAL_INCLUDE_DIRS}
     ${GNURADIO_AUDIO_INCLUDE_DIRS}
@@ -103,6 +109,7 @@ link_directories(
     ${UHD_LIBRARY_DIRS}
     ${GNURADIO_UHD_LIBRARY_DIRS}
     ${GNURADIO_FILTER_LIBRARY_DIRS}
+    ${GNURADIO_FFT_LIBRARY_DIRS}
     ${GNURADIO_ANALOG_LIBRARY_DIRS}
     ${GNURADIO_DIGITAL_LIBRARY_DIRS}
     ${GNURADIO_AUDIO_LIBRARY_DIRS}
@@ -115,6 +122,7 @@ set(gr_link_libs
     ${UHD_LIBRARIES}
     ${GNURADIO_UHD_LIBRARIES}
     ${GNURADIO_FILTER_LIBRARIES}
+    ${GNURADIO_FFT_LIBRARIES}
     ${GNURADIO_ANALOG_LIBRARIES}
     ${GNURADIO_DIGITAL_LIBRARIES}
     ${GNURADIO_AUDIO_LIBRARIES}
