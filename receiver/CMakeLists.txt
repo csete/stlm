@@ -130,6 +130,9 @@ set(gr_link_libs
 
 set(strx_HDRS
     strx/receiver.h
+    strx/strx_api.h
+    strx/strx_fft.h
+    strx/strx_fft_impl.h
     strx/strx_source_c.h
     strx/strx_source_c_impl.h
 )
@@ -137,6 +140,7 @@ set(strx_HDRS
 set(strx_SRCS
     strx/receiver.cpp
     strx/strx.cpp
+    strx/strx_fft_impl.cpp
     strx/strx_source_c_impl.cpp
 )
 
