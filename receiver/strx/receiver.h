@@ -39,6 +39,7 @@
 #endif
 
 // strx includes
+#include "strx_fft.h"
 #include "strx_source_c.h"
 
 using namespace gr;
@@ -105,14 +106,15 @@ private:
 
     gr_top_block_sptr tb;  /*!< Receiver top block. */
     
-    strx::source_c::sptr                      src;    /*!< Input source. */
-    std::vector<float>                       taps;   /*!< Channel filter taps. */
-    filter::freq_xlating_fir_filter_ccf::sptr filter; /*!< Channel filter. */
-    analog::quadrature_demod_cf::sptr         demod;  /*!< Demodulator. */
-    filter::single_pole_iir_filter_ff::sptr   iir;    /*!< IIR filter for carrier offset estimation. */
-    blocks::sub_ff::sptr                      sub;    /*!< Carrier offset correction. */
+    strx::source_c::sptr                       src;    /*!< Input source. */
+    strx::fft_c::sptr                          fft;    /*!< Receiver FFT block. */
+    std::vector<float>                        taps;   /*!< Channel filter taps. */
+    filter::freq_xlating_fir_filter_ccf::sptr  filter; /*!< Channel filter. */
+    analog::quadrature_demod_cf::sptr          demod;  /*!< Demodulator. */
+    filter::single_pole_iir_filter_ff::sptr    iir;    /*!< IIR filter for carrier offset estimation. */
+    blocks::sub_ff::sptr                       sub;    /*!< Carrier offset correction. */
     
-    digital::clock_recovery_mm_ff::sptr clock_recov;
+    digital::clock_recovery_mm_ff::sptr        clock_recov; /*!< M&M clock recovery block .*/
     blocks::file_sink::sptr fifo;
 
     std::string d_name; /*!< Receiver name. */

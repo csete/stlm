@@ -47,6 +47,7 @@ receiver::receiver(const std::string name, const std::string input, const std::s
     tb = gr_make_top_block(d_name);
 
     src = strx::source_c::make(input, d_quad_rate);
+    fft = strx::fft_c::make();
 
     taps = filter::firdes::low_pass(1.0, d_quad_rate, 400e3, 900.e3);
     filter = filter::freq_xlating_fir_filter_ccf::make(1, taps, 0.0, d_quad_rate);
@@ -222,7 +223,7 @@ void receiver::set_filter(double low, double high, double trans_width)
 void receiver::connect_all()
 {
     tb->connect(src, 0, filter, 0);
-        
+    tb->connect(src, 0, fft, 0);
     tb->connect(filter, 0, demod, 0);
     tb->connect(demod, 0, iir, 0);
     tb->connect(demod, 0, sub, 0);
