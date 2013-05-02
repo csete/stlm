@@ -82,7 +82,11 @@ public:
     double lo(void);
 
     void set_filter(double low, double high, double trans_width);
+
     void set_fft_rate(long rate);
+
+    void process_fft(void);
+    void process_snr(void);
 
 private:
     void connect_all(void);
@@ -125,7 +129,7 @@ private:
     bool d_running;
     double d_quad_rate;
 
-    boost::thread fft_thread;
+    boost::thread fft_thread;    /*!< FFT thread. */
 };
 
 #endif // RECEIVER_H

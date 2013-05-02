@@ -40,13 +40,13 @@ static void fft_thread_func(receiver *rx)
 {
     for(;;)
     {
-        std::cout << "FFT thread running: " << rx->lo() << std::endl;
+        rx->process_fft();
+        rx->process_snr();
 
         try
         {
             // Sleep and check for interrupt.
-            // To check for interrupt without sleep,
-            // use boost::this_thread::interruption_point()
+            // To check for interrupt without sleep, use boost::this_thread::interruption_point()
             // which also throws boost::thread_interrupted
             boost::this_thread::sleep(boost::posix_time::milliseconds(fft_delay_msec));
         }
@@ -280,4 +280,21 @@ void receiver::connect_all()
     tb->connect(iir, 0, sub, 1);
     tb->connect(sub, 0, clock_recov, 0);
     tb->connect(clock_recov, 0, fifo, 0);
+}
+
+/*! \brief Process FFT data.
+ *
+ * Perform FFT data processing consisting of the following steps:
+ * - Fetch the latest FFT data
+ * - Scale it according to FFT size
+ * - Convert to dBFS
+ * - Calculate the average if averaging is enabled
+ */
+void receiver::process_fft(void)
+{
+}
+
+/*! \brief Calculate signal to noise ratios. */
+void receiver::process_snr(void)
+{
 }
