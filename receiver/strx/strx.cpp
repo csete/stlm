@@ -26,7 +26,6 @@
 
 namespace po = boost::program_options;
 
-
 /*! Convert command line argument to frequency in Hz.
  * \param arg The command line argument, e.g. 2400M
  * \return The frequency in Hz.
@@ -57,7 +56,6 @@ double arg_to_freq(const std::string arg)
 
     return freq;
 }
-
 
 int main(int argc, char **argv)
 {

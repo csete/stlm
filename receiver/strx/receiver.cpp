@@ -17,11 +17,46 @@
  * the Free Software Foundation, Inc., 51 Franklin Street,
  * Boston, MA 02110-1301, USA.
  */
+#include <boost/thread.hpp>
+
 #ifdef GR_CTRLPORT
 #include <rpcregisterhelpers.h>
 #endif
 #include "receiver.h"
 
+
+static long fft_delay_msec = 40;
+
+/*! \brief FFT thread function.
+ *  \param rx The active instance of the receiver object.
+ *
+ * The FFT thread function rund periodically and performs the following
+ * tasks:
+ *   - Get new FFT data and scale the FFT properly
+ *   - Calculate SNR for both receiver channels
+ *   - Send SNR for the active channel to the audio indicator.
+ */
+static void fft_thread_func(receiver *rx)
+{
+    for(;;)
+    {
+        std::cout << "FFT thread running: " << rx->lo() << std::endl;
+
+        try
+        {
+            // Sleep and check for interrupt.
+            // To check for interrupt without sleep,
+            // use boost::this_thread::interruption_point()
+            // which also throws boost::thread_interrupted
+            boost::this_thread::sleep(boost::posix_time::milliseconds(fft_delay_msec));
+        }
+        catch(boost::thread_interrupted&)
+        {
+            std::cout << "FFT thread is stopped" << std::endl;
+            return;
+        }
+    }
+}
 
 /*! \brief Public contructor.
  *  \param name The receiver name. Used for ctrlport names.
@@ -64,6 +99,8 @@ receiver::receiver(const std::string name, const std::string input, const std::s
     {
         fifo = blocks::file_sink::make(sizeof(float), output.c_str());
     }
+
+    fft_thread = boost::thread(&fft_thread_func, this);
 
 #ifdef GR_CTRLPORT
     add_rpc_variable(rpcbasic_sptr(new rpcbasic_register_get<receiver, double>
@@ -116,9 +153,10 @@ receiver::receiver(const std::string name, const std::string input, const std::s
 /*! \brief Public destructor. */
 receiver::~receiver()
 {
+    fft_thread.interrupt();
+    fft_thread.join();
     tb->stop();
 }
-
 
 /*! \brief Start the receiver. */
 void receiver::start()
@@ -217,6 +255,18 @@ double receiver::lo(void)
 
 void receiver::set_filter(double low, double high, double trans_width)
 {
+}
+
+/*! Set FFT rate.
+ *  \param rate The new FFT rate in Hz (updates per second).
+ *
+ * The FFT rate is the frequency by which the FFT thread is running.
+ *
+ * \sa fft_thread_func
+ */
+void receiver::set_fft_rate(long rate)
+{
+    fft_delay_msec = 1000 / rate;
 }
 
 /*! Connect all blocks in the receiver chain. */

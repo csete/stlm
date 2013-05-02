@@ -23,6 +23,9 @@
 // standard includes
 #include <string>
 
+// Boost includes
+#include <boost/thread.hpp>
+
 // GNU Radio includes
 #include <analog/quadrature_demod_cf.h>
 #include <blocks/file_sink.h>
@@ -79,6 +82,7 @@ public:
     double lo(void);
 
     void set_filter(double low, double high, double trans_width);
+    void set_fft_rate(long rate);
 
 private:
     void connect_all(void);
@@ -120,6 +124,8 @@ private:
     std::string d_name; /*!< Receiver name. */
     bool d_running;
     double d_quad_rate;
+
+    boost::thread fft_thread;
 };
 
 #endif // RECEIVER_H
