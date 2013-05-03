@@ -18,6 +18,7 @@
  * Boston, MA 02110-1301, USA.
  */
 #include <boost/thread.hpp>
+#include <boost/thread/shared_mutex.hpp>
 
 #ifdef GR_CTRLPORT
 #include <rpcregisterhelpers.h>
@@ -314,6 +315,7 @@ void receiver::process_fft(void)
     std::complex<float> pt;             /* a single FFT point used in calculations */
     std::complex<float> scaleFactor;    /* normalizing factor (fftsize cast to complex) */
 
+    fft_lock.lock();
 
     fft->get_fft_data(d_fftData, fftsize);
     if (fftsize == 0)
@@ -343,6 +345,8 @@ void receiver::process_fft(void)
 
         d_iirFftData[i] = (1.0 - gain) * d_iirFftData[i] + gain * d_realFftData[i];
     }
+
+    fft_lock.unlock();
 }
 
 /*! \brief Calculate signal to noise ratios. */

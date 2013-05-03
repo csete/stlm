@@ -25,6 +25,7 @@
 
 // Boost includes
 #include <boost/thread.hpp>
+#include <boost/thread/shared_mutex.hpp>
 
 // GNU Radio includes
 #include <analog/quadrature_demod_cf.h>
@@ -129,7 +130,8 @@ private:
     bool d_running;
     double d_quad_rate;
 
-    boost::thread fft_thread;    /*!< FFT thread. */
+    boost::thread        fft_thread;  /*!< FFT thread. */
+    boost::shared_mutex  fft_lock;    /*!< Mutex for locking FFT data while processing and reading. */
     std::complex<float>*  d_fftData;
     double *d_realFftData; /** FIXME: use vector */
     double *d_iirFftData;  /** FIXME: use vector */
