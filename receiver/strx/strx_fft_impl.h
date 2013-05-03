@@ -34,7 +34,7 @@ namespace strx {
     class fft_c_impl : public fft_c
     {
     public:
-        fft_c_impl(unsigned int fftsize=4000, int wintype=gr::filter::firdes::WIN_HAMMING);
+        fft_c_impl(int fftsize=4000, int wintype=gr::filter::firdes::WIN_HAMMING);
         ~fft_c_impl();
 
         int work(int noutput_items,
@@ -42,21 +42,21 @@ namespace strx {
                  gr_vector_void_star &output_items);
 
         // Public API functions documented in strx_fft.h
-        void get_fft_data(std::complex<float>* fft_points, unsigned int &fft_size);
+        void get_fft_data(std::complex<float>* fft_points, int &fft_size);
         void set_window_type(int wintype);
         int  get_window_type();
-        void set_fft_size(unsigned int fftsize);
-        unsigned int get_fft_size();
+        void set_fft_size(int fftsize);
+        int get_fft_size();
 
     private:
-        unsigned int d_fftsize;   /*! Current FFT size. */
+        int           d_fftsize;   /*! Current FFT size. */
         int           d_wintype;   /*! Current window type. */
         boost::mutex  d_mutex;     /*! Used to lock FFT output buffer. */
         gr::fft::fft_complex *d_fft;    /*! FFT object. */
         std::vector<float>   d_window; /*! FFT window taps. */
         boost::circular_buffer<gr_complex> d_cbuf; /*! buffer to accumulate samples. */
 
-        void do_fft(const gr_complex *data_in, unsigned int size);
+        void do_fft(const gr_complex *data_in, int size);
     };
 
 } // namespace strx

@@ -22,12 +22,12 @@
 
 namespace strx {
 
-    fft_c::sptr fft_c::make(unsigned int fftsize, int wintype)
+    fft_c::sptr fft_c::make(int fftsize, int wintype)
     {
         return gnuradio::get_initial_sptr(new fft_c_impl(fftsize, wintype));
     }
 
-    fft_c_impl::fft_c_impl(unsigned int fftsize, int wintype)
+    fft_c_impl::fft_c_impl(int fftsize, int wintype)
       : gr_sync_block("strx_fft_c",
                       gr_make_io_signature(1, 1, sizeof (gr_complex)),
                       gr_make_io_signature(0, 0, 0)),
@@ -75,7 +75,7 @@ namespace strx {
         return noutput_items;
     }
 
-    void fft_c_impl::get_fft_data(std::complex<float>* fftPoints, unsigned int &fftSize)
+    void fft_c_impl::get_fft_data(std::complex<float>* fftPoints, int &fftSize)
     {
         boost::mutex::scoped_lock lock(d_mutex);
 
@@ -103,13 +103,13 @@ namespace strx {
      * Note that this function does not lock the mutex since the caller, get_fft_data()
      * has alrady locked it.
      */
-    void fft_c_impl::do_fft(const gr_complex *data_in, unsigned int size)
+    void fft_c_impl::do_fft(const gr_complex *data_in, int size)
     {
         // apply window, then execute FFT
         if (d_window.size())
         {
             gr_complex *dst = d_fft->get_inbuf();
-            for (unsigned int i = 0; i < size; i++)
+            for (int i = 0; i < size; i++)
                 dst[i] = data_in[i] * d_window[i];
         }
         else
@@ -120,7 +120,7 @@ namespace strx {
         d_fft->execute();
     }
 
-    void fft_c_impl::set_fft_size(unsigned int fftsize)
+    void fft_c_impl::set_fft_size(int fftsize)
     {
         if (fftsize != d_fftsize)
         {
@@ -142,7 +142,7 @@ namespace strx {
         }
     }
 
-    unsigned int fft_c_impl::get_fft_size()
+    int fft_c_impl::get_fft_size()
     {
         return d_fftsize;
     }

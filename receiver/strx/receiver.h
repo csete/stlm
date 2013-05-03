@@ -130,6 +130,11 @@ private:
     double d_quad_rate;
 
     boost::thread fft_thread;    /*!< FFT thread. */
+    std::complex<float>*  d_fftData;
+    double *d_realFftData; /** FIXME: use vector */
+    double *d_iirFftData;  /** FIXME: use vector */
+    double  d_fftAvg;      /*!< FFT averaging parameter set by user (not the true gain). */
+
 };
 
 #endif // RECEIVER_H

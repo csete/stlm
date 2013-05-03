@@ -70,8 +70,6 @@ static void fft_thread_func(receiver *rx)
  * \todo Use gr-osmosdr as soon as it support gnuradio 3.7
  */
 receiver::receiver(const std::string name, const std::string input, const std::string output, double quad_rate)
-    : d_running(false),
-      d_quad_rate(quad_rate)
 {
 
     if (name.empty())
@@ -79,6 +77,11 @@ receiver::receiver(const std::string name, const std::string input, const std::s
     else
         d_name = name;
 
+    // initialize misc parameters
+    d_running = false;
+    d_quad_rate = quad_rate;
+
+    // Initialize DSP blocks
     tb = gr_make_top_block(d_name);
 
     src = strx::source_c::make(input, d_quad_rate);
@@ -100,8 +103,16 @@ receiver::receiver(const std::string name, const std::string input, const std::s
         fifo = blocks::file_sink::make(sizeof(float), output.c_str());
     }
 
+    // Initialize FFT
     fft_thread = boost::thread(&fft_thread_func, this);
+    d_fftAvg = 0.5;
+    d_fftData = new std::complex<float>[MAX_FFT_SIZE];
+    d_realFftData = new double[MAX_FFT_SIZE];
+    d_iirFftData = new double[MAX_FFT_SIZE];
+    for (int i = 0; i < MAX_FFT_SIZE; i++)
+        d_iirFftData[i] = -120.0;  // dBFS
 
+    // initialize control port
 #ifdef GR_CTRLPORT
     add_rpc_variable(rpcbasic_sptr(new rpcbasic_register_get<receiver, double>
             (
@@ -156,6 +167,10 @@ receiver::~receiver()
     fft_thread.interrupt();
     fft_thread.join();
     tb->stop();
+
+    delete [] d_fftData;
+    delete [] d_realFftData;
+    delete [] d_iirFftData;
 }
 
 /*! \brief Start the receiver. */
@@ -292,6 +307,42 @@ void receiver::connect_all()
  */
 void receiver::process_fft(void)
 {
+    int fftsize;
+    int i;
+    double gain;
+    double pwr;
+    std::complex<float> pt;             /* a single FFT point used in calculations */
+    std::complex<float> scaleFactor;    /* normalizing factor (fftsize cast to complex) */
+
+
+    fft->get_fft_data(d_fftData, fftsize);
+    if (fftsize == 0)
+        return;
+
+    scaleFactor = std::complex<float>((float)fftsize);
+
+    // Normalize, calculcate power and shift the FFT
+    for (i = 0; i < fftsize; i++)
+    {
+        // normalize and shift
+        if (i < fftsize/2)
+        {
+            pt = d_fftData[fftsize/2+i] / scaleFactor;
+        }
+        else
+        {
+            pt = d_fftData[i-fftsize/2] / scaleFactor;
+        }
+        pwr = pt.imag()*pt.imag() + pt.real()*pt.real();
+
+        /* calculate power in dBFS */
+        d_realFftData[i] = 10.0 * log10(pwr + 1.0e-20);
+
+        /* FFT averaging (aka. video filter) */
+        gain = d_fftAvg * (150.0+d_realFftData[i])/150.0;
+
+        d_iirFftData[i] = (1.0 - gain) * d_iirFftData[i] + gain * d_realFftData[i];
+    }
 }
 
 /*! \brief Calculate signal to noise ratios. */

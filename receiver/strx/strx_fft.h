@@ -54,14 +54,14 @@ namespace strx {
          *  \param fftsize The FFT size.
          *  \param wintype The window type.
          */
-        static sptr make(unsigned int fftsize=4000, int wintype=gr::filter::firdes::WIN_HAMMING);
+        static sptr make(int fftsize=4000, int wintype=gr::filter::firdes::WIN_HAMMING);
 
         /*! \brief Get new FFT data.
          *  \param fft_points The calculated FFT points
          *  \param fft_size The number of points in the fft_points array. This number will either be
          *                   FFT size or 0 if there weren't enough samples accumulated in the buffer.
          */
-        virtual void get_fft_data(std::complex<float>* fft_points, unsigned int &fft_size) = 0;
+        virtual void get_fft_data(std::complex<float>* fft_points, int &fft_size) = 0;
 
         /*! \brief Set new window type.
          *  \param wintype See filter/firdes.h
@@ -76,12 +76,12 @@ namespace strx {
         /*! \brief Set new FFT size.
          *  \param fftsize The new FFT size.
          */
-        virtual void set_fft_size(unsigned int fftsize) = 0;
+        virtual void set_fft_size(int fftsize) = 0;
 
         /*! \brief Get current FFT size.
          *  \returns The current FFT size.
          */
-        virtual unsigned int get_fft_size() = 0;
+        virtual int get_fft_size() = 0;
 
     };
 
