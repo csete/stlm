@@ -106,12 +106,12 @@ receiver::receiver(const std::string name, const std::string input, const std::s
 
     // Initialize FFT
     fft_thread = boost::thread(&fft_thread_func, this);
-    d_fftAvg = 0.5;
+    d_fftAvg = 0.5f;
     d_fftData = new std::complex<float>[MAX_FFT_SIZE];
-    d_realFftData = new double[MAX_FFT_SIZE];
-    d_iirFftData = new double[MAX_FFT_SIZE];
+    d_realFftData = new float[MAX_FFT_SIZE];
+    d_iirFftData = new float[MAX_FFT_SIZE];
     for (int i = 0; i < MAX_FFT_SIZE; i++)
-        d_iirFftData[i] = -120.0;  // dBFS
+        d_iirFftData[i] = -120.0f;  // dBFS
 
     // initialize control port
 #ifdef GR_CTRLPORT
@@ -310,8 +310,8 @@ void receiver::process_fft(void)
 {
     int fftsize;
     int i;
-    double gain;
-    double pwr;
+    float gain;
+    float pwr;
     std::complex<float> pt;             /* a single FFT point used in calculations */
     std::complex<float> scaleFactor;    /* normalizing factor (fftsize cast to complex) */
 

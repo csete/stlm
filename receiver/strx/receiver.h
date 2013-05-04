@@ -133,9 +133,9 @@ private:
     boost::thread        fft_thread;  /*!< FFT thread. */
     boost::shared_mutex  fft_lock;    /*!< Mutex for locking FFT data while processing and reading. */
     std::complex<float>*  d_fftData;
-    double *d_realFftData; /** FIXME: use vector */
-    double *d_iirFftData;  /** FIXME: use vector */
-    double  d_fftAvg;      /*!< FFT averaging parameter set by user (not the true gain). */
+    float *d_realFftData; /** FIXME: use vector */
+    float *d_iirFftData;  /** FIXME: use vector */
+    float  d_fftAvg;      /*!< FFT averaging parameter set by user (not the true gain). */
 
 };
 
