@@ -22,6 +22,7 @@
 
 // standard includes
 #include <string>
+#include <vector>
 
 // Boost includes
 #include <boost/thread.hpp>
@@ -89,6 +90,8 @@ public:
     void process_fft(void);
     void process_snr(void);
 
+    std::vector<float> get_fft_data(void);
+
 private:
     void connect_all(void);
 
@@ -133,6 +136,7 @@ private:
     boost::thread        fft_thread;  /*!< FFT thread. */
     boost::shared_mutex  fft_lock;    /*!< Mutex for locking FFT data while processing and reading. */
     std::complex<float>*  d_fftData;
+    int    d_fftLen;  /*!< Number of points returned by FFT block. */
     float *d_realFftData; /** FIXME: use vector */
     float *d_iirFftData;  /** FIXME: use vector */
     float  d_fftAvg;      /*!< FFT averaging parameter set by user (not the true gain). */

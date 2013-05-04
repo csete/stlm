@@ -17,6 +17,11 @@
  * the Free Software Foundation, Inc., 51 Franklin Street,
  * Boston, MA 02110-1301, USA.
  */
+
+// Standard includes
+#include <vector>
+
+// Boost includes
 #include <boost/thread.hpp>
 #include <boost/thread/shared_mutex.hpp>
 
@@ -107,6 +112,7 @@ receiver::receiver(const std::string name, const std::string input, const std::s
     // Initialize FFT
     fft_thread = boost::thread(&fft_thread_func, this);
     d_fftAvg = 0.5f;
+    d_fftLen = 0;
     d_fftData = new std::complex<float>[MAX_FFT_SIZE];
     d_realFftData = new float[MAX_FFT_SIZE];
     d_iirFftData = new float[MAX_FFT_SIZE];
@@ -126,6 +132,22 @@ receiver::receiver(const std::string name, const std::string input, const std::s
                 "RF frequency", // const char* desc_ = "",
                 RPC_PRIVLVL_MIN,
                 DISPNULL
+            )
+    ));
+
+    add_rpc_variable(rpcbasic_sptr(new rpcbasic_register_get<receiver, std::vector<float> >
+            (
+                d_name,   // const std::string& name,
+                "fft",  // const char* functionbase,
+                this,      // T* obj,
+                &receiver::get_fft_data, // Tfrom (T::*function)(),
+                pmt::make_f32vector(0, -200.0f),
+                pmt::make_f32vector(0, 0.0f),
+                pmt::make_f32vector(0, -120.0f),
+                "dBFS", // const char* units_ = "",
+                "Baseband FFT", // const char* desc_ = "",
+                RPC_PRIVLVL_MIN,
+                DISPXY | DISPOPTSCATTER
             )
     ));
 
@@ -285,6 +307,23 @@ void receiver::set_fft_rate(long rate)
     fft_delay_msec = 1000 / rate;
 }
 
+/*! Get latest FFT data. */
+std::vector<float> receiver::get_fft_data(void)
+{
+    if (d_iirFftData != NULL && d_fftLen > 0)
+    {
+        fft_lock.lock();
+        std::vector<float> vec(d_iirFftData, d_iirFftData+d_fftLen);
+        fft_lock.unlock();
+        return vec;
+    }
+    else
+    {
+        std::vector<float> vec;
+        return vec;
+    }
+}
+
 /*! Connect all blocks in the receiver chain. */
 void receiver::connect_all()
 {
@@ -308,32 +347,30 @@ void receiver::connect_all()
  */
 void receiver::process_fft(void)
 {
-    int fftsize;
     int i;
     float gain;
     float pwr;
     std::complex<float> pt;             /* a single FFT point used in calculations */
     std::complex<float> scaleFactor;    /* normalizing factor (fftsize cast to complex) */
 
-    fft_lock.lock();
-
-    fft->get_fft_data(d_fftData, fftsize);
-    if (fftsize == 0)
+    fft->get_fft_data(d_fftData, d_fftLen);
+    if (d_fftLen == 0)
         return;
 
-    scaleFactor = std::complex<float>((float)fftsize);
+    fft_lock.lock();
+    scaleFactor = std::complex<float>((float)d_fftLen);
 
     // Normalize, calculcate power and shift the FFT
-    for (i = 0; i < fftsize; i++)
+    for (i = 0; i < d_fftLen; i++)
     {
         // normalize and shift
-        if (i < fftsize/2)
+        if (i < d_fftLen/2)
         {
-            pt = d_fftData[fftsize/2+i] / scaleFactor;
+            pt = d_fftData[d_fftLen/2+i] / scaleFactor;
         }
         else
         {
-            pt = d_fftData[i-fftsize/2] / scaleFactor;
+            pt = d_fftData[i-d_fftLen/2] / scaleFactor;
         }
         pwr = pt.imag()*pt.imag() + pt.real()*pt.real();
 
