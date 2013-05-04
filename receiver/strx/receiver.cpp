@@ -307,7 +307,13 @@ void receiver::set_fft_rate(long rate)
     fft_delay_msec = 1000 / rate;
 }
 
-/*! Get latest FFT data. */
+/*! Get latest FFT data.
+ *  \return A vector of floats containing the latest FFT data (dBFS units).
+ *
+ * This function is used by the control port to fetch the latest FFT data.
+ * The FFT data has already been prostprocessed and converted to dBFS, thus
+ * all we need to do here is to copy the data to a vector.
+ */
 std::vector<float> receiver::get_fft_data(void)
 {
     if (d_iirFftData != NULL && d_fftLen > 0)
@@ -344,6 +350,10 @@ void receiver::connect_all()
  * - Scale it according to FFT size
  * - Convert to dBFS
  * - Calculate the average if averaging is enabled
+ * The processing is performed at each cycle even though we could postpone the
+ * conversion to dBFS and averaging to only happen when someone asks for it. I
+ * expect though that this extra processing will reduce the control port latency
+ * since the requested data is already avaialble.
  */
 void receiver::process_fft(void)
 {
