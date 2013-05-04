@@ -1,0 +1,6 @@
+[horizontal]
+*AAU*:: ?
+*GNC*:: Guidance, navigation and control
+*SNR*:: Signal to noise ratio
+*USRP*:: Universal Software Radio Peripheral
+
