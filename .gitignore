@@ -4,4 +4,5 @@ receiver/strx-mon/gnuradio.h
 receiver/strx-mon/gnuradio.o
 receiver/strx-mon/strx-mon
 receiver/strx-mon/strx-mon.o
+receiver/strx-mon/qtgui/qtgui.pro.user
 
