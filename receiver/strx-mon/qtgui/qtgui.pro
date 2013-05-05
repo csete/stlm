@@ -9,12 +9,17 @@ QT       += core gui
 TARGET = qtgui
 TEMPLATE = app
 
-SOURCES += main.cpp\
-    mainwindow.cpp
+SOURCES += \
+    main.cpp \
+    mainwindow.cpp \
+    plotter.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += \
+    mainwindow.h \
+    plotter.h
 
-FORMS    += mainwindow.ui
+FORMS    += \
+    mainwindow.ui
 
 # ICE stuff
 LIBS += -lIce -lIceUtil
