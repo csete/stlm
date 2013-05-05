@@ -30,8 +30,16 @@ MainWindow::MainWindow(Ice::ObjectPrx ice_prx, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+    // setup UI
     ui->setupUi(this);
     ui->mainToolBar->setVisible(false);
+    ui->plotter->setPercent2DScreen(100);
+    ui->plotter->setCenterFreq(2335000000);
+    ui->plotter->setSampleRate(2.e6);
+    ui->plotter->setSpanFreq(2e6);
+    ui->plotter->setFilterBoxEnabled(false);
+    ui->plotter->setFftPlotColor(QColor(0x7F,0xFA,0xFA,0xFF));
+    ui->plotter->setFftFill(true);
 
     // create control-port instance
     ctrlport = GNURadio::ControlPortPrx::checkedCast(ice_prx);
@@ -40,7 +48,7 @@ MainWindow::MainWindow(Ice::ObjectPrx ice_prx, QWidget *parent) :
     // setup data refreshimer
     dataTimer = new QTimer(this);
     connect(dataTimer, SIGNAL(timeout()), this, SLOT(refresh()));
-    dataTimer->start(1000);
+    dataTimer->start(100);
 }
 
 MainWindow::~MainWindow()
@@ -65,11 +73,14 @@ void MainWindow::refresh(void)
 
     knob_map = ctrlport->get(id_list);
 
-    knob = knob_map["strx::lo"];
-    knob_lo = (GNURadio::KnobDPtr)(knob);
-    qDebug() << "strx::lo" << knob_lo->value;
+    //knob = knob_map["strx::lo"];
+    //knob_lo = (GNURadio::KnobDPtr)(knob);
+    //qDebug() << "strx::lo" << knob_lo->value;
 
     knob = knob_map["strx::fft"];
     knob_fft = (GNURadio::KnobVecFPtr)(knob);
-    qDebug() << "strx::fft" << knob_fft->value.size();
+    if (knob_fft->value.size())
+    {
+        ui->plotter->setNewFttData(&knob_fft->value[0], knob_fft->value.size());
+    }
 }
