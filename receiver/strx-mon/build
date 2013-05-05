@@ -1,4 +1,5 @@
 slice2cpp --output-dir common common/gnuradio.ice
-c++ -fpermissive -I. -I$ICE_HOME/include -c gnuradio.cpp strx-mon.cpp
-c++ -o strx-mon gnuradio.o strx-mon.o -L$ICE_HOME/lib -lIce -lIceUtil
+
+# c++ -fpermissive -I. -I$ICE_HOME/include -c gnuradio.cpp strx-mon.cpp
+# c++ -o strx-mon gnuradio.o strx-mon.o -L$ICE_HOME/lib -lIce -lIceUtil
 
