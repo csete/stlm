@@ -35,8 +35,8 @@ public:
         resizeEvent(NULL);
     }
 
-    void setNewFttData(double *fftData, int size);
-    void setNewFttData(double *fftData, double *wfData, int size);
+    void setNewFttData(float *fftData, int size);
+    void setNewFttData(float *fftData, float *wfData, int size);
 
     void setCenterFreq(quint64 f);
     void setFreqUnits(qint32 unit) { m_FreqUnits = unit; }
@@ -146,14 +146,14 @@ private:
     void clampDemodParameters();
 
     void getScreenIntegerFFTData(qint32 plotHeight, qint32 plotWidth,
-                                 double maxdB, double mindB,
+                                 float maxdB, float mindB,
                                  qint32 startFreq, qint32 stopFreq,
-                                 double *inBuf, qint32 *outBuf,
+                                 float *inBuf, qint32 *outBuf,
                                  qint32 *maxbin, qint32 *minbin);
 
     qint32 m_fftbuf[MAX_SCREENSIZE];
-    double *m_fftData;     /*! pointer to incoming FFT data */
-    double *m_wfData;
+    float *m_fftData;     /*! pointer to incoming FFT data */
+    float *m_wfData;
     int     m_fftDataSize;
 
     int m_XAxisYCenter;

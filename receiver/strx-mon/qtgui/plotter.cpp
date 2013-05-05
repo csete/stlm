@@ -675,7 +675,7 @@ void CPlotter::draw()
  * When FFT data is set using this method, the same data will be used for bith the
  * pandapter and the waterfall.
  */
-void CPlotter::setNewFttData(double *fftData, int size)
+void CPlotter::setNewFttData(float *fftData, int size)
 {
 
     /** FIXME **/
@@ -698,7 +698,7 @@ void CPlotter::setNewFttData(double *fftData, int size)
  * waterfall.
  */
 
-void CPlotter::setNewFttData(double *fftData, double *wfData, int size)
+void CPlotter::setNewFttData(float *fftData, float *wfData, int size)
 {
 
     /** FIXME **/
@@ -713,9 +713,9 @@ void CPlotter::setNewFttData(double *fftData, double *wfData, int size)
 }
 
 void CPlotter::getScreenIntegerFFTData(qint32 plotHeight, qint32 plotWidth,
-                                       double maxdB, double mindB,
+                                       float maxdB, float mindB,
                                        qint32 startFreq, qint32 stopFreq,
-                                       double *inBuf, qint32 *outBuf,
+                                       float *inBuf, qint32 *outBuf,
                                        int *xmin, int *xmax)
 {
     qint32 i;
@@ -726,8 +726,8 @@ void CPlotter::getScreenIntegerFFTData(qint32 plotHeight, qint32 plotWidth,
     qint32 minbin, maxbin;
     qint32 m_BinMin, m_BinMax;
     qint32 m_FFTSize = m_fftDataSize;
-    double *m_pFFTAveBuf = inBuf;
-    double  dBGainFactor = ((double)plotHeight)/abs(maxdB-mindB);
+    float *m_pFFTAveBuf = inBuf;
+    float  dBGainFactor = ((float)plotHeight)/abs(maxdB-mindB);
     qint32* m_pTranslateTbl = new qint32[qMax(m_FFTSize, plotWidth)];
 
     m_BinMin = (qint32)((double)startFreq*(double)m_FFTSize/m_SampleFreq);
