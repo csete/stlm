@@ -38,7 +38,8 @@ namespace strx {
                        gr_make_io_signature(0, 0, sizeof (gr_complex)),
                        gr_make_io_signature(1, 1, sizeof (gr_complex))),
         d_quad_rate(quad_rate),
-        d_freq(0.0)
+        d_freq(0.0),
+        d_gain(0.0)
     {
 
         // Check input type
@@ -90,10 +91,17 @@ namespace strx {
             *stop = range.stop();
             *step = range.step();
         }
+        else
+        {
+            *start = 100.e6;
+            *stop = 200.e6;
+            *step = 1.0;
+        }
     }
 
     void source_c_impl::set_gain(double gain)
     {
+		d_gain = gain;
         if (input_type == INPUT_TYPE_UHD)
             usrp_src->set_gain(gain);
     }
@@ -101,9 +109,11 @@ namespace strx {
     double source_c_impl::get_gain(void)
     {
         if (input_type == INPUT_TYPE_UHD)
-            return usrp_src->get_gain();
+        {
+            return d_gain;//usrp_src->get_gain();
+        }
         else
-            return 0.0;
+            return d_gain;
     }
 
     void source_c_impl::get_gain_range(double *start, double *stop, double *step)
@@ -114,6 +124,12 @@ namespace strx {
             *start = range.start();
             *stop = range.stop();
             *step = range.step();
+        }
+        else
+        {
+            *start = 0.0;
+            *stop = 100.0;
+            *step = 1.0;
         }
     }
 
