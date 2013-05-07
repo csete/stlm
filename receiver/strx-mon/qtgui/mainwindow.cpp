@@ -35,8 +35,8 @@ MainWindow::MainWindow(Ice::ObjectPrx ice_prx, QWidget *parent) :
     ui->mainToolBar->setVisible(false);
     ui->plotter->setPercent2DScreen(100);
     ui->plotter->setCenterFreq(2335000000);
-    ui->plotter->setSampleRate(2.e6);
-    ui->plotter->setSpanFreq(2e6);
+    ui->plotter->setSampleRate(4.e6);
+    ui->plotter->setSpanFreq(4e6);
     ui->plotter->setFilterBoxEnabled(false);
     ui->plotter->setFftPlotColor(QColor(0x7F,0xFA,0xFA,0xFF));
     ui->plotter->setFftFill(true);
