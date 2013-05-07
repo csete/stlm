@@ -64,7 +64,7 @@ class receiver
 
 public:
 
-    receiver(const std::string name="", const std::string input="", const std::string output="", double quad_rate=2.e6);
+    receiver(const std::string name="", const std::string input="", const std::string output="", double quad_rate=4.e6);
     ~receiver();
 
     void start();
@@ -110,7 +110,7 @@ private:
     /*! Input type. */
     enum input_type_e
     {
-        INPUT_TYPE_FILE = 0, /*!< Input is complex 2 Msps I/Q file. */
+        INPUT_TYPE_FILE = 0, /*!< Input is complex 4 Msps I/Q file. */
         INPUT_TYPE_UHD  = 1, /*!< Input is a USRP device. */
     };
     

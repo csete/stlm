@@ -94,7 +94,7 @@ receiver::receiver(const std::string name, const std::string input, const std::s
     fft = strx::fft_c::make();
 
     taps = filter::firdes::low_pass(1.0, d_quad_rate, 400e3, 900.e3);
-    filter = filter::freq_xlating_fir_filter_ccf::make(1, taps, 0.0, d_quad_rate);
+    filter = filter::freq_xlating_fir_filter_ccf::make(2, taps, 0.0, d_quad_rate);
     demod = analog::quadrature_demod_cf::make(1.f);
     iir = filter::single_pole_iir_filter_ff::make(1.e-3);
     sub = blocks::sub_ff::make();
