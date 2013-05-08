@@ -16,23 +16,32 @@
  * the Free Software Foundation, Inc., 51 Franklin Street,
  * Boston, MA 02110-1301, USA.
  */
+
+#include <boost/program_options.hpp>
 #include <iostream>
 
 #include <Ice/Ice.h>
+#include <QString>
 #include <QtGui/QApplication>
 
 #include "mainwindow.h"
 
 int main(int argc, char *argv[])
 {
+	QString conn;
     Ice::CommunicatorPtr ice_com;
     Ice::ObjectPrx       ice_prx;
+
+	if (argc == 3)
+		conn = QString("gnuradio:tcp -h %1 -p %2").arg(argv[1]).arg(argv[2]);
+	else
+		conn = QString("gnuradio:tcp -h localhost -p 43243");
 
     try
     {
         // Get proxy object
         ice_com = Ice::initialize(argc, argv);
-        ice_prx = ice_com->stringToProxy("gnuradio:tcp -h localhost -p 43243");
+        ice_prx = ice_com->stringToProxy(conn.toStdString());
     }
     catch (const Ice::Exception& ex)
     {
