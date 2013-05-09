@@ -92,6 +92,9 @@ public:
 
     std::vector<float> get_fft_data(void);
 
+    void iqrec_enable(int enable);
+    int iqrec_enabled(void);
+
 private:
     void connect_all(void);
 
@@ -127,7 +130,8 @@ private:
     blocks::sub_ff::sptr                       sub;    /*!< Carrier offset correction. */
     
     digital::clock_recovery_mm_ff::sptr        clock_recov; /*!< M&M clock recovery block .*/
-    blocks::file_sink::sptr fifo;
+    blocks::file_sink::sptr                    iqrec;   /*!< I/Q recorder block. */
+    blocks::file_sink::sptr                    fifo;    /*!< Demodulator output. */
 
     std::string d_name; /*!< Receiver name. */
     bool d_running;
@@ -140,7 +144,7 @@ private:
     float *d_realFftData; /** FIXME: use vector */
     float *d_iirFftData;  /** FIXME: use vector */
     float  d_fftAvg;      /*!< FFT averaging parameter set by user (not the true gain). */
-
+    int    d_recording;   /*!< I/Q recording enabled. */
 };
 
 #endif // RECEIVER_H

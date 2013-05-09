@@ -19,6 +19,8 @@
  */
 
 // Standard includes
+#include <time.h>
+#include <string>
 #include <vector>
 
 // Boost includes
@@ -64,6 +66,19 @@ static void fft_thread_func(receiver *rx)
     }
 }
 
+/*! Get current date/time, format is YYYYMMDD-HHMMSS */
+const char* currentDateTime() {
+    time_t     now = time(0);
+    struct tm tstruct;
+    char       buf[20];
+
+    tstruct = *gmtime(&now);
+    // for more information about date/time format
+    strftime(buf, sizeof(buf), "%Y%m%d-%H%M%S", &tstruct);
+
+    return buf;
+}
+
 /*! \brief Public contructor.
  *  \param name The receiver name. Used for ctrlport names.
  *  \param input Input device specifier (see below).
@@ -92,6 +107,9 @@ receiver::receiver(const std::string name, const std::string input, const std::s
 
     src = strx::source_c::make(input, d_quad_rate);
     fft = strx::fft_c::make();
+    iqrec = blocks::file_sink::make(sizeof(gr_complex), "/tmp/strx.raw");
+    iqrec->close();
+    d_recording = 0;
 
     taps = filter::firdes::low_pass(1.0, d_quad_rate, 400e3, 900.e3);
     filter = filter::freq_xlating_fir_filter_ccf::make(2, taps, 0.0, d_quad_rate);
@@ -174,6 +192,34 @@ receiver::receiver(const std::string name, const std::string input, const std::s
                 pmt::mp(-d_quad_rate/2.0), pmt::mp(d_quad_rate/2.0), pmt::mp(0.0),
                 "Hz", // const char* units_ = "",
                 "Receiver LO", // const char* desc_ = "",
+                RPC_PRIVLVL_MIN,
+                DISPNULL
+            )
+    ));
+
+    // I/Q recording
+    add_rpc_variable(rpcbasic_sptr(new rpcbasic_register_get<receiver, int>
+            (
+                d_name,   // const std::string& name,
+                "iqrec",  // const char* functionbase,
+                this,      // T* obj,
+                &receiver::iqrec_enabled, // Tfrom (T::*function)(),
+                pmt::mp(0), pmt::mp(1), pmt::mp(0),
+                "ena", // const char* units_ = "",
+                "I/Q recording", // const char* desc_ = "",
+                RPC_PRIVLVL_MIN,
+                DISPNULL
+            )
+    ));
+    add_rpc_variable(rpcbasic_sptr(new rpcbasic_register_set<receiver, int>
+            (
+                d_name,   // const std::string& name,
+                "iqrec",  // const char* functionbase,
+                this,      // T* obj,
+                &receiver::iqrec_enable, // Tfrom (T::*function)(),
+                pmt::mp(0), pmt::mp(1), pmt::mp(0),
+                "ena", // const char* units_ = "",
+                "I/Q recording", // const char* desc_ = "",
                 RPC_PRIVLVL_MIN,
                 DISPNULL
             )
@@ -335,6 +381,7 @@ void receiver::connect_all()
 {
     tb->connect(src, 0, filter, 0);
     tb->connect(src, 0, fft, 0);
+    tb->connect(src, 0, iqrec, 0);
     tb->connect(filter, 0, demod, 0);
     tb->connect(demod, 0, iir, 0);
     tb->connect(demod, 0, sub, 0);
@@ -399,4 +446,41 @@ void receiver::process_fft(void)
 /*! \brief Calculate signal to noise ratios. */
 void receiver::process_snr(void)
 {
+}
+
+/*! \brief Enable or disable I/Q recording.
+ *  \param enable Whether recording should be enabled or disabled.
+ *
+ * When recording is enabled we start recording an I/Q file connetcted
+ * directly to to the UHD source. The filename is of the form:
+ *   sapphire_freq_rate_YYYYMMDD-HHMMSS.raw
+ * This function can also be used to restart a recording into a new file.
+ */
+void receiver::iqrec_enable(int enable)
+{
+    if (d_recording)
+    {
+        // stop ongoing recording
+        iqrec->close();
+    }
+
+    if (enable)
+    {
+        // start new recording
+        int freq = (int)(rf_freq() / 1.e3);   // frequency in kHz
+        int rate = (int)(d_quad_rate / 1.e6); // sample rate in Msps
+        char buff[80];
+
+        sprintf(buff, "sapphire_%dkHz_%dMsps_%s.raw", freq, rate, currentDateTime());
+
+        iqrec->open(buff);
+        iqrec->do_update();
+    }
+
+    d_recording = enable;
+}
+
+int receiver::iqrec_enabled(void)
+{
+    return d_recording;
 }
