@@ -147,7 +147,7 @@ receiver::receiver(const std::string name, const std::string input, const std::s
                 &receiver::rf_freq, // Tfrom (T::*function)(),
                 pmt::mp(50.0e6), pmt::mp(2.0e9), pmt::mp(100.0e6),
                 "Hz", // const char* units_ = "",
-                "RF frequency", // const char* desc_ = "",
+                "RF frequency (read only)", // const char* desc_ = "",
                 RPC_PRIVLVL_MIN,
                 DISPNULL
             )
