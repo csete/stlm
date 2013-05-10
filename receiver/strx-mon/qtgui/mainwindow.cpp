@@ -74,7 +74,10 @@ void MainWindow::makeParamList(void)
 
     id_list_fft.push_back("strx::fft");
 
-    id_list_filt.push_back("strx::frequency");
+    id_list_read.push_back("strx::frequency");
+    id_list_read.push_back("strx::offset");
+    id_list_read.push_back("strx::cutoff");
+
     id_list_filt.push_back("strx::offset");
     id_list_filt.push_back("strx::cutoff");
 
@@ -104,7 +107,7 @@ void MainWindow::refresh(void)
     if (!(cb_counter % 10))
     {
         cb_counter = 0;
-        knob_map = ctrlport->get(id_list_filt);
+        knob_map = ctrlport->get(id_list_read);
 
         knob = knob_map["strx::offset"];
         knob_d = (GNURadio::KnobDPtr)(knob);
@@ -122,7 +125,25 @@ void MainWindow::refresh(void)
 
 }
 
-/*! Cwap channel button has been clicked */
+/*! New filter offset */
+void MainWindow::on_plotter_newDemodFreq(qint64 freq, qint64 delta)
+{
+    Q_UNUSED(freq);
+
+    GNURadio::KnobMap  knob_map; // map<string, GNURadio::KnobPtr>
+    GNURadio::KnobPtr  knob;
+    GNURadio::KnobDPtr knob_d;
+
+    knob_map = ctrlport->get(id_list_filt);
+    knob = knob_map["strx::offset"];
+    knob_d = (GNURadio::KnobDPtr)(knob);
+    knob_d->value = (double)delta;
+
+    // send new value
+    ctrlport->set(knob_map);
+}
+
+/*! Swap channel button has been clicked */
 void MainWindow::on_chanButton_clicked(void)
 {
     GNURadio::KnobMap  knob_map; // map<string, GNURadio::KnobPtr>
@@ -133,14 +154,11 @@ void MainWindow::on_chanButton_clicked(void)
     knob = knob_map["strx::channel"];
     knob_i = (GNURadio::KnobIPtr)(knob);
 
-    qDebug() << "CHANNEL: " << knob_i->value;
-
     if (knob_i->value)
         knob_i->value = 0;
     else
         knob_i->value = 1;
 
-    // set new value
+    // send new value
     ctrlport->set(knob_map);
-
 }

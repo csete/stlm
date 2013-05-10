@@ -43,6 +43,7 @@ private:
     GNURadio::ControlPortPrx ctrlport;
     GNURadio::KnobIDList     id_list_all;  // vector<string>
     GNURadio::KnobIDList     id_list_fft;  // FFT only (fast refresh)
+    GNURadio::KnobIDList     id_list_read; // FIXME
     GNURadio::KnobIDList     id_list_filt; // Filter parameters
     GNURadio::KnobIDList     id_list_chan; // Channel parameters
 
@@ -53,7 +54,7 @@ private:
 
 private slots:
     void refresh(void);
-
+    void on_plotter_newDemodFreq(qint64 freq, qint64 delta);
     void on_chanButton_clicked(void);
 };
 
