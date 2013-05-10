@@ -108,6 +108,7 @@ receiver::receiver(const std::string name, const std::string input, const std::s
     src = strx::source_c::make(input, d_quad_rate);
     fft = strx::fft_c::make();
     iqrec = blocks::file_sink::make(sizeof(gr_complex), "/tmp/strx.raw");
+    iqrec->set_unbuffered(true);
     iqrec->close();
     d_recording = 0;
 
