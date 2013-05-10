@@ -52,6 +52,7 @@ MainWindow::MainWindow(Ice::ObjectPrx ice_prx, QWidget *parent) :
     makeParamList();
 
     // setup data refreshimer
+    cb_counter = 0;
     dataTimer = new QTimer(this);
     connect(dataTimer, SIGNAL(timeout()), this, SLOT(refresh()));
     dataTimer->start(100);
@@ -66,22 +67,29 @@ MainWindow::~MainWindow()
 
 void MainWindow::makeParamList(void)
 {
-    id_list.push_back("strx::lo");
-    id_list.push_back("strx::fft");
+    id_list_all.push_back("strx::frequency");
+    id_list_all.push_back("strx::offset");
+    id_list_all.push_back("strx::fft");
+
+    id_list_fft.push_back("strx::fft");
+
+    id_list_filt.push_back("strx::frequency");
+    id_list_filt.push_back("strx::offset");
+    id_list_filt.push_back("strx::cutoff");
+    id_list_filt.push_back("strx::channel");
 }
 
 void MainWindow::refresh(void)
 {
     GNURadio::KnobMap knob_map; // map<string, GNURadio::KnobPtr>
     GNURadio::KnobPtr  knob;
-    GNURadio::KnobDPtr knob_lo;
+    GNURadio::KnobDPtr knob_offs;
     GNURadio::KnobVecFPtr knob_fft;
 
-    knob_map = ctrlport->get(id_list);
+    cb_counter++;
 
-    //knob = knob_map["strx::lo"];
-    //knob_lo = (GNURadio::KnobDPtr)(knob);
-    //qDebug() << "strx::lo" << knob_lo->value;
+    // FFT is refreshed in each cycle
+    knob_map = ctrlport->get(id_list_fft);
 
     knob = knob_map["strx::fft"];
     knob_fft = (GNURadio::KnobVecFPtr)(knob);
@@ -89,4 +97,16 @@ void MainWindow::refresh(void)
     {
         ui->plotter->setNewFttData(&knob_fft->value[0], knob_fft->value.size());
     }
+
+    // update frequencies and filters parameters at 1Hz
+    if (!(cb_counter % 10))
+    {
+        cb_counter = 0;
+        knob_map = ctrlport->get(id_list_filt);
+
+        knob = knob_map["strx::offset"];
+        knob_offs = (GNURadio::KnobDPtr)(knob);
+        ui->plotter->setFilterOffset((qint64)knob_offs->value);
+    }
+
 }

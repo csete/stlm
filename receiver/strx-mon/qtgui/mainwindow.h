@@ -41,8 +41,12 @@ private:
     Ui::MainWindow *ui;
 
     GNURadio::ControlPortPrx ctrlport;
-    GNURadio::KnobIDList     id_list;  // vector<string>
+    GNURadio::KnobIDList     id_list_all;  // vector<string>
+    GNURadio::KnobIDList     id_list_fft;  // FFT only (fast refresh)
+    GNURadio::KnobIDList     id_list_filt; // Filter parameters
+
     QTimer *dataTimer;  /*!< Timer used to fetch data from remote receiver. */
+    int     cb_counter; /*!< Callback counter. */
 
     void makeParamList(void);
 
