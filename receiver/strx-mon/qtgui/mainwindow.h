@@ -44,6 +44,7 @@ private:
     GNURadio::KnobIDList     id_list_all;  // vector<string>
     GNURadio::KnobIDList     id_list_fft;  // FFT only (fast refresh)
     GNURadio::KnobIDList     id_list_filt; // Filter parameters
+    GNURadio::KnobIDList     id_list_chan; // Channel parameters
 
     QTimer *dataTimer;  /*!< Timer used to fetch data from remote receiver. */
     int     cb_counter; /*!< Callback counter. */
@@ -52,6 +53,8 @@ private:
 
 private slots:
     void refresh(void);
+
+    void on_chanButton_clicked(void);
 };
 
 #endif // MAINWINDOW_H
