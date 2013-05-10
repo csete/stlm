@@ -39,8 +39,13 @@ MainWindow::MainWindow(Ice::ObjectPrx ice_prx, QWidget *parent) :
     ui->plotter->setSampleRate(4.e6);
     ui->plotter->setSpanFreq(4e6);
     ui->plotter->setFilterBoxEnabled(true);
+    ui->plotter->setClickResolution(1e3);
+    ui->plotter->setFilterClickResolution(1e3);
+    ui->plotter->setDemodRanges(-1e6, -50e3, 50e3, 1e6, true);
+    ui->plotter->setHiLowCutFrequencies(-400e3, 400e3);
     ui->plotter->setFftPlotColor(QColor(0x7F,0xFA,0xFA,0xFF));
     ui->plotter->setFftFill(true);
+    ui->plotter->resetHorizontalZoom(); // weird that we need to call this...
 
     // create control-port instance
     ctrlport = GNURadio::ControlPortPrx::checkedCast(ice_prx);
