@@ -126,6 +126,28 @@ void MainWindow::refresh(void)
 
 }
 
+/*! New filter cutoff. */
+void MainWindow::on_plotter_newFilterFreq(int low, int high)
+{
+    double cutoff = (double)high;
+    Q_UNUSED(low);
+
+    GNURadio::KnobMap  knob_map; // map<string, GNURadio::KnobPtr>
+    GNURadio::KnobPtr  knob;
+    GNURadio::KnobDPtr knob_d;
+
+    knob_map = ctrlport->get(id_list_filt);
+    knob = knob_map["strx::cutoff"];
+    knob_d = (GNURadio::KnobDPtr)(knob);
+
+    if (knob_d->value != cutoff)
+    {
+        // send new value
+        knob_d->value = cutoff;
+        ctrlport->set(knob_map);
+    }
+}
+
 /*! New filter offset */
 void MainWindow::on_plotter_newDemodFreq(qint64 freq, qint64 delta)
 {
