@@ -71,6 +71,7 @@ void MainWindow::makeParamList(void)
     id_list_all.push_back("strx::offset");
     id_list_all.push_back("strx::fft");
     id_list_all.push_back("strx::channel");
+    id_list_all.push_back("strx::iqrec");
 
     id_list_fft.push_back("strx::fft");
 
@@ -105,9 +106,8 @@ void MainWindow::refresh(void)
     }
 
     // update frequencies and filters parameters at 1Hz
-    if (!(cb_counter % 10))
+    if (!(cb_counter % 1))
     {
-        cb_counter = 0;
         knob_map = ctrlport->get(id_list_read);
 
         knob = knob_map["strx::offset"];
@@ -181,4 +181,7 @@ void MainWindow::on_chanButton_clicked(void)
 
     // send new value
     ctrlport->set(knob_map);
+
+    // trigger an update in thenext cycle
+    cb_counter = 0;
 }
