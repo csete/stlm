@@ -152,6 +152,7 @@ void MainWindow::on_plotter_newFilterFreq(int low, int high)
 void MainWindow::on_plotter_newDemodFreq(qint64 freq, qint64 delta)
 {
     Q_UNUSED(freq);
+    double offset = (double)delta;
 
     GNURadio::KnobMap  knob_map; // map<string, GNURadio::KnobPtr>
     GNURadio::KnobPtr  knob;
@@ -160,10 +161,13 @@ void MainWindow::on_plotter_newDemodFreq(qint64 freq, qint64 delta)
     knob_map = ctrlport->get(id_list_filt);
     knob = knob_map["strx::offset"];
     knob_d = (GNURadio::KnobDPtr)(knob);
-    knob_d->value = (double)delta;
 
-    // send new value
-    ctrlport->set(knob_map);
+    if (knob_d->value != offset)
+    {
+        // send new value
+        knob_d->value = offset;
+        ctrlport->set(knob_map);
+    }
 }
 
 /*! Record button toggled. */
