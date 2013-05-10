@@ -78,6 +78,9 @@ public:
     void rf_freq_range(double *start, double *stop, double *step);
     void set_rf_freq(double freq);
     double rf_freq(void);
+    double rx_freq(void);
+
+    void set_lnb_lo(double freq_hz) { d_lnb_lo = freq_hz; }
 
     void rf_gain_range(double *start, double *stop, double *step);
     void set_rf_gain(double gain);
@@ -143,6 +146,8 @@ private:
     std::string d_name; /*!< Receiver name. */
     bool d_running;
     double d_quad_rate;
+
+    double d_lnb_lo;
 
     // Channel filter stuff
     double d_cutoff;             /*!< Channel filter cutoff (1/2 BW). */

@@ -101,6 +101,7 @@ receiver::receiver(const std::string name, const std::string input, const std::s
     // initialize misc parameters
     d_running = false;
     d_quad_rate = quad_rate;
+    d_lnb_lo = 0.0;
 
     // Initialize DSP blocks
     tb = gr_make_top_block(d_name);
@@ -152,10 +153,10 @@ receiver::receiver(const std::string name, const std::string input, const std::s
                 d_name,   // const std::string& name,
                 "frequency",  // const char* functionbase,
                 this,      // T* obj,
-                &receiver::rf_freq, // Tfrom (T::*function)(),
+                &receiver::rx_freq, // Tfrom (T::*function)(),
                 pmt::mp(50.0e6), pmt::mp(2.0e9), pmt::mp(100.0e6),
                 "Hz", // const char* units_ = "",
-                "RF frequency (read only)", // const char* desc_ = "",
+                "Receiver frequency (read only)", // const char* desc_ = "",
                 RPC_PRIVLVL_MIN,
                 DISPNULL
             )
@@ -347,6 +348,15 @@ void receiver::set_rf_freq(double freq_hz)
 double receiver::rf_freq(void)
 {
     return src->get_freq();
+}
+
+/*! Get receiver freuqency.
+ *
+ * The receiver frequency is the RF frequency + the LN LO.
+ */
+double receiver::rx_freq(void)
+{
+    return (rf_freq() + d_lnb_lo);
 }
 
 /*! Get RF frequency range for the current device

@@ -63,8 +63,10 @@ int main(int argc, char **argv)
 
     // command line options
     std::string freq_str;
+    std::string lnb_str;
     std::string ant_str;
     double freq;
+    double lnb;
     double gain;
     bool clierr=false;
     std::string rxname;
@@ -79,6 +81,7 @@ int main(int argc, char **argv)
         ("ant,a", po::value<std::string>(&ant_str), "Select USRP antenna (e.g. RX2)")
         ("freq,f", po::value<std::string>(&freq_str), "RF frequency in Hz or using G, M, k suffix")
         ("gain,g", po::value<double>(&gain), "RF/IF gain in dB")
+        ("lnb,l", po::value<std::string>(&lnb_str), "LNB LO frequency in Hz or using G, M, k suffix")
         ("output,o", po::value<std::string>(&output)->default_value(""), "Output file (use stdout if omitted)")
     ;
     po::variables_map vm;
@@ -113,6 +116,11 @@ int main(int argc, char **argv)
     if (vm.count("ant"))
     {
         rx->set_antenna(ant_str);
+    }
+    if (vm.count("lnb"))
+    {
+        lnb = arg_to_freq(lnb_str);
+        rx->set_lnb_lo(lnb);
     }
 
     rx->start();
