@@ -111,8 +111,15 @@ receiver::receiver(const std::string name, const std::string input, const std::s
     iqrec->close();
     d_recording = 0;
 
-    taps = filter::firdes::low_pass(1.0, d_quad_rate, 400e3, 900.e3);
-    filter = filter::freq_xlating_fir_filter_ccf::make(2, taps, 0.0, d_quad_rate);
+    // channel filter setup
+    d_ch_offs[0] = -1.0e6;
+    d_ch_offs[1] = 1.0e6;
+    d_ch = 0;
+    d_cutoff = 400e3;
+    taps = filter::firdes::low_pass(1.0, d_quad_rate, d_cutoff, d_cutoff);
+    filter = filter::freq_xlating_fir_filter_ccf::make(2, taps, d_ch_offs[d_ch], d_quad_rate);
+
+    // other blocks
     demod = analog::quadrature_demod_cf::make(1.f);
     iir = filter::single_pole_iir_filter_ff::make(1.e-3);
     sub = blocks::sub_ff::make();
@@ -173,12 +180,12 @@ receiver::receiver(const std::string name, const std::string input, const std::s
     add_rpc_variable(rpcbasic_sptr(new rpcbasic_register_get<receiver, double>
             (
                 d_name,   // const std::string& name,
-                "lo",  // const char* functionbase,
+                "offset",  // const char* functionbase,
                 this,      // T* obj,
-                &receiver::lo, // Tfrom (T::*function)(),
+                &receiver::get_filter_offset, // Tfrom (T::*function)(),
                 pmt::mp(-d_quad_rate/2.0), pmt::mp(d_quad_rate/2.0), pmt::mp(0.0),
                 "Hz", // const char* units_ = "",
-                "Receiver LO", // const char* desc_ = "",
+                "Channel offset", // const char* desc_ = "",
                 RPC_PRIVLVL_MIN,
                 DISPNULL
             )
@@ -186,12 +193,40 @@ receiver::receiver(const std::string name, const std::string input, const std::s
     add_rpc_variable(rpcbasic_sptr(new rpcbasic_register_set<receiver, double>
             (
                 d_name,   // const std::string& name,
-                "lo",  // const char* functionbase,
+                "offset",  // const char* functionbase,
                 this,      // T* obj,
-                &receiver::set_lo, // Tfrom (T::*function)(),
+                &receiver::set_filter_offset, // Tfrom (T::*function)(),
                 pmt::mp(-d_quad_rate/2.0), pmt::mp(d_quad_rate/2.0), pmt::mp(0.0),
                 "Hz", // const char* units_ = "",
-                "Receiver LO", // const char* desc_ = "",
+                "Channel offset", // const char* desc_ = "",
+                RPC_PRIVLVL_MIN,
+                DISPNULL
+            )
+    ));
+
+    // Channel selector
+    add_rpc_variable(rpcbasic_sptr(new rpcbasic_register_get<receiver, int>
+            (
+                d_name,   // const std::string& name,
+                "channel",  // const char* functionbase,
+                this,      // T* obj,
+                &receiver::get_active_channel, // Tfrom (T::*function)(),
+                pmt::mp(0), pmt::mp(MAX_CHAN), pmt::mp(d_ch),
+                "", // const char* units_ = "",
+                "Active channel", // const char* desc_ = "",
+                RPC_PRIVLVL_MIN,
+                DISPNULL
+            )
+    ));
+    add_rpc_variable(rpcbasic_sptr(new rpcbasic_register_set<receiver, int>
+            (
+                d_name,   // const std::string& name,
+                "channel",  // const char* functionbase,
+                this,      // T* obj,
+                &receiver::set_active_channel, // Tfrom (T::*function)(),
+                pmt::mp(0), pmt::mp(MAX_CHAN), pmt::mp(d_ch),
+                "", // const char* units_ = "",
+                "Active channel", // const char* desc_ = "",
                 RPC_PRIVLVL_MIN,
                 DISPNULL
             )
@@ -321,25 +356,62 @@ void receiver::rf_gain_range(double *start, double *stop, double *step)
     src->get_gain_range(start, stop, step);
 }
 
-/*! Set receiver LO.
- * \param lo The new LO frequency in Hz.
+/*! Set channel filter offset (aka. receiver LO).
+ * \param freq_hz The new offset frequency in Hz.
  */
-void receiver::set_lo(double lo)
+void receiver::set_filter_offset(double freq_hz)
 {
-    filter->set_center_freq(lo);
+    filter->set_center_freq(freq_hz);
+    d_ch_offs[d_ch] = freq_hz;
 }
 
-/*! Get receiver LO.
- * \returns The current receiver LO frequency in Hz.
+/*! Get channel filter offset (aka. receiver LO).
+ * \returns The current channel filter offset frequency in Hz.
  */
-double receiver::lo(void)
+double receiver::get_filter_offset(void)
 {
     return filter->center_freq();
 }
 
-void receiver::set_filter(double low, double high, double trans_width)
+/*! Set new filter cutoff and transition width
+ *  \param freq_hz The new cutoff frequency.
+ *
+ * This function generates and sets new filter taps for the frequency
+ * translating FIR filter (our channel filter). The transition with is set
+ * to be equal to the cutoff frequency.
+ */
+void receiver::set_filter_cutoff(double freq_hz)
 {
+    if (freq_hz < 50e3)
+        return;
+
+    d_cutoff = freq_hz;
+    taps = filter::firdes::low_pass(1.0, d_quad_rate, d_cutoff, d_cutoff);
+    filter->set_taps(taps);
 }
+
+/*! Get current filter cutoff (1/2 width) */
+double receiver::get_filter_cutoff(void)
+{
+    return d_cutoff;
+}
+
+/*! Select new channel */
+void receiver::set_active_channel(int channel)
+{
+    if (channel <= MAX_CHAN)
+    {
+        d_ch = channel;
+        filter->set_center_freq(d_ch_offs[d_ch]);
+    }
+}
+
+/*! Get active channel */
+int  receiver::get_active_channel(void)
+{
+    return d_ch;
+}
+
 
 /*! Set FFT rate.
  *  \param rate The new FFT rate in Hz (updates per second).

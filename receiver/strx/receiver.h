@@ -47,6 +47,9 @@
 #include "strx_fft.h"
 #include "strx_source_c.h"
 
+/*! Max number of "memory" channels */
+#define MAX_CHAN 1
+
 using namespace gr;
 
 /*! \defgroup RX High level receiver blocks. */
@@ -80,10 +83,14 @@ public:
     void set_rf_gain(double gain);
     double rf_gain(void);
 
-    void set_lo(double lo);
-    double lo(void);
+    void   set_filter_offset(double freq_hz);
+    double get_filter_offset(void);
 
-    void set_filter(double low, double high, double trans_width);
+    void   set_filter_cutoff(double freq_hz);
+    double get_filter_cutoff(void);
+
+    void set_active_channel(int channel);
+    int  get_active_channel(void);
 
     void set_fft_rate(long rate);
 
@@ -137,6 +144,12 @@ private:
     bool d_running;
     double d_quad_rate;
 
+    // Channel filter stuff
+    double d_cutoff;             /*!< Channel filter cutoff (1/2 BW). */
+    double d_ch_offs[MAX_CHAN];  /*!< Channel offsets from center (Hz). */
+    int    d_ch;                  /*!< Active channel. */
+
+    // FFT stuff
     boost::thread        fft_thread;  /*!< FFT thread. */
     boost::shared_mutex  fft_lock;    /*!< Mutex for locking FFT data while processing and reading. */
     std::complex<float>*  d_fftData;
