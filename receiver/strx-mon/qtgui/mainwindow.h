@@ -45,7 +45,7 @@ private:
     GNURadio::KnobIDList     id_list_fft;  // FFT only (fast refresh)
     GNURadio::KnobIDList     id_list_read; // FIXME
     GNURadio::KnobIDList     id_list_filt; // Filter parameters
-    GNURadio::KnobIDList     id_list_chan; // Channel parameters
+    GNURadio::KnobIDList     id_list_ctl;  // Various control parameters
 
     QTimer *dataTimer;  /*!< Timer used to fetch data from remote receiver. */
     int     cb_counter; /*!< Callback counter. */
@@ -55,6 +55,7 @@ private:
 private slots:
     void refresh(void);
     void on_plotter_newDemodFreq(qint64 freq, qint64 delta);
+    void on_recButton_toggled(bool checked);
     void on_chanButton_clicked(void);
 };
 

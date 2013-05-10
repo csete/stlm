@@ -81,7 +81,8 @@ void MainWindow::makeParamList(void)
     id_list_filt.push_back("strx::offset");
     id_list_filt.push_back("strx::cutoff");
 
-    id_list_chan.push_back("strx::channel");
+    id_list_ctl.push_back("strx::iqrec");
+    id_list_ctl.push_back("strx::channel");
 }
 
 void MainWindow::refresh(void)
@@ -143,6 +144,25 @@ void MainWindow::on_plotter_newDemodFreq(qint64 freq, qint64 delta)
     ctrlport->set(knob_map);
 }
 
+/*! Record button toggled. */
+void MainWindow::on_recButton_toggled(bool checked)
+{
+    GNURadio::KnobMap  knob_map; // map<string, GNURadio::KnobPtr>
+    GNURadio::KnobPtr  knob;
+    GNURadio::KnobIPtr knob_i;
+
+    knob_map = ctrlport->get(id_list_ctl);
+    knob = knob_map["strx::iqrec"];
+    knob_i = (GNURadio::KnobIPtr)(knob);
+
+    int chk = checked ? 1 : 0;
+    if (knob_i->value != chk)
+    {
+        knob_i->value = chk;
+        ctrlport->set(knob_map);
+    }
+}
+
 /*! Swap channel button has been clicked */
 void MainWindow::on_chanButton_clicked(void)
 {
@@ -150,7 +170,7 @@ void MainWindow::on_chanButton_clicked(void)
     GNURadio::KnobPtr  knob;
     GNURadio::KnobIPtr knob_i;
 
-    knob_map = ctrlport->get(id_list_chan);
+    knob_map = ctrlport->get(id_list_ctl);
     knob = knob_map["strx::channel"];
     knob_i = (GNURadio::KnobIPtr)(knob);
 
