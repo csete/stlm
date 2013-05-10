@@ -34,8 +34,8 @@ MainWindow::MainWindow(Ice::ObjectPrx ice_prx, QWidget *parent) :
     ui->setupUi(this);
     ui->mainToolBar->setVisible(false);
     ui->plotter->setPercent2DScreen(100);
-    ui->plotter->setCenterFreq(2336e6);
-    ui->plotter->setFftCenterFreq(2336e6);
+    ui->plotter->setCenterFreq(2330e6);
+    ui->plotter->setFftCenterFreq(2330e6);
     ui->plotter->setSampleRate(4.e6);
     ui->plotter->setSpanFreq(4e6);
     ui->plotter->setFilterBoxEnabled(true);
@@ -83,7 +83,7 @@ void MainWindow::refresh(void)
 {
     GNURadio::KnobMap knob_map; // map<string, GNURadio::KnobPtr>
     GNURadio::KnobPtr  knob;
-    GNURadio::KnobDPtr knob_offs;
+    GNURadio::KnobDPtr knob_d;
     GNURadio::KnobVecFPtr knob_fft;
 
     cb_counter++;
@@ -105,8 +105,12 @@ void MainWindow::refresh(void)
         knob_map = ctrlport->get(id_list_filt);
 
         knob = knob_map["strx::offset"];
-        knob_offs = (GNURadio::KnobDPtr)(knob);
-        ui->plotter->setFilterOffset((qint64)knob_offs->value);
+        knob_d = (GNURadio::KnobDPtr)(knob);
+        ui->plotter->setFilterOffset((qint64)knob_d->value);
+
+        knob = knob_map["strx::frequency"];
+        knob_d = (GNURadio::KnobDPtr)(knob);
+        ui->plotter->setCenterFreq((qint64)knob_d->value);
     }
 
 }
