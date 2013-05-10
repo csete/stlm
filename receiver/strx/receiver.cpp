@@ -70,7 +70,7 @@ static void fft_thread_func(receiver *rx)
 const char* currentDateTime() {
     time_t     now = time(0);
     struct tm tstruct;
-    char       buf[20];
+    static char buf[20];
 
     tstruct = *gmtime(&now);
     // for more information about date/time format
@@ -199,6 +199,34 @@ receiver::receiver(const std::string name, const std::string input, const std::s
                 pmt::mp(-d_quad_rate/2.0), pmt::mp(d_quad_rate/2.0), pmt::mp(0.0),
                 "Hz", // const char* units_ = "",
                 "Channel offset", // const char* desc_ = "",
+                RPC_PRIVLVL_MIN,
+                DISPNULL
+            )
+    ));
+
+    // Filter cutoff
+    add_rpc_variable(rpcbasic_sptr(new rpcbasic_register_get<receiver, double>
+            (
+                d_name,   // const std::string& name,
+                "cutoff",  // const char* functionbase,
+                this,      // T* obj,
+                &receiver::get_filter_cutoff, // Tfrom (T::*function)(),
+                pmt::mp(-d_quad_rate/2.0), pmt::mp(d_quad_rate/2.0), pmt::mp(d_cutoff),
+                "Hz", // const char* units_ = "",
+                "Filter cutoff", // const char* desc_ = "",
+                RPC_PRIVLVL_MIN,
+                DISPNULL
+            )
+    ));
+    add_rpc_variable(rpcbasic_sptr(new rpcbasic_register_set<receiver, double>
+            (
+                d_name,   // const std::string& name,
+                "cutoff",  // const char* functionbase,
+                this,      // T* obj,
+                &receiver::set_filter_cutoff, // Tfrom (T::*function)(),
+                pmt::mp(-d_quad_rate/2.0), pmt::mp(d_quad_rate/2.0), pmt::mp(d_cutoff),
+                "Hz", // const char* units_ = "",
+                "Filter cutoff", // const char* desc_ = "",
                 RPC_PRIVLVL_MIN,
                 DISPNULL
             )
