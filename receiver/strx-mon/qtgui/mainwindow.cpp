@@ -108,6 +108,11 @@ void MainWindow::refresh(void)
         knob_d = (GNURadio::KnobDPtr)(knob);
         ui->plotter->setFilterOffset((qint64)knob_d->value);
 
+        knob = knob_map["strx::cutoff"];
+        knob_d = (GNURadio::KnobDPtr)(knob);
+        int cutoff = (int)knob_d->value;
+        ui->plotter->setHiLowCutFrequencies(-cutoff, cutoff);
+
         knob = knob_map["strx::frequency"];
         knob_d = (GNURadio::KnobDPtr)(knob);
         ui->plotter->setCenterFreq((qint64)knob_d->value);
