@@ -43,49 +43,193 @@ typedef struct _correlator_t {
 } correlator_t;
 
 
+fd_set	fixed_read_fds;
+int	fixed_nfds;
 
-void write_socket (int sockno, int length, uint8_t *data)
+struct client {
+	struct client	*prev;	/* Pointer to the previous one in the chain. */
+	struct client	*next;	/* Pointer to the next one in the chain. */
+	int		fd;	/* Socket file descriptor. */
+};
+
+struct client_set {
+	int			listen_fd;	/* Accept socket. */
+	unsigned long long	packets;	/* Number of packets received on this channel. */
+	unsigned long long	bytes;		/* Number of bytes received on this channel. */
+	struct client		*list;		/* List of connected sockets. */
+};
+
+struct client_set client_set [270];	/* Array of client sockets. */
+
+
+
+static void init_sockets (void)
 {
-	static int 	sockets [2] = {-1, -1};;
-	int		x;
+	int			x;
+	struct sockaddr_in	addr;
+	size_t			addr_size;
+	int			opt_val;
 
-return;
+	memset (client_set, 0, sizeof (client_set));
+	FD_ZERO (&fixed_read_fds);
+	fixed_nfds = 0;
 
-	if (sockets [sockno] < 0) {
-		/* Have to open the socket first. */
-		int fd;
-		fd = socket (AF_INET, SOCK_STREAM, 0);
-		if (fd >= 0) {
-			struct sockaddr_in	in;
-			int			v;
-			memset (&in, 0, sizeof (in));
-			in.sin_family = AF_INET;
-			x = inet_aton ("192.168.254.50", &in.sin_addr);
-			if (x < 0) {
-				perror ("inet_aton:");
-				exit (1);
-			}
-			in.sin_port = htons (4001 + sockno);
-			x = connect (fd, (struct sockaddr *) &in, sizeof (in));
-			if (x < 0) {
-				perror ("connect");
-				exit (1);
-			}
+	/* Create a listening socket for the first 32 slots. */
+	for (x = 0; x < 32; x++) {
+		client_set [x].listen_fd = socket (AF_INET, SOCK_STREAM, 0);
+		if (client_set [x].listen_fd < 0) {
+			perror ("socket: ");
+			exit (1);
+		}
+		addr.sin_addr.s_addr = INADDR_ANY;
+		addr.sin_port = htons (4000 + x);
+		addr.sin_family = AF_INET;
+		addr_size = sizeof (addr);
+		if (bind (client_set [x].listen_fd, (struct sockaddr *)&addr, addr_size) < 0) {
+			perror ("bind: ");
+			exit (1);
+		}
 
-			/* Make socket non-blocking. */
-			v = fcntl (fd, F_GETFL, 0);
-			v = v | O_NONBLOCK;
-			x = fcntl (fd, F_SETFL, v);
+		opt_val = 1;
+		setsockopt (client_set [x].listen_fd, SOL_SOCKET, SO_REUSEADDR, &opt_val, sizeof (opt_val));
 
-			sockets [sockno] = fd;
+		if (listen (client_set [x].listen_fd, 5) < 0) {
+			perror ("listen: ");
+			exit (1);
+		}
+
+		/* Add the listening handle to the fixed read_fds. */
+		FD_SET (client_set [x].listen_fd, &fixed_read_fds);
+		if (client_set [x].listen_fd >= fixed_nfds) {
+			fixed_nfds = client_set [x].listen_fd + 1;
 		}
 	}
 
-	if (sockets [sockno] >= 0) {
-		x = send (sockets [sockno], data, length, 0);
+	/* Create a listening socket for the command port. */
+	client_set [260].listen_fd = socket (AF_INET, SOCK_STREAM, 0);
+	if (client_set [x].listen_fd < 0) {
+		perror ("socket: ");
+		exit (1);
+	}
+	addr.sin_addr.s_addr = INADDR_ANY;
+	addr.sin_port = htons (5000);
+	addr.sin_family = AF_INET;
+	addr_size = sizeof (addr);
+	if (bind (client_set [260].listen_fd, (struct sockaddr *)&addr, addr_size) < 0) {
+		perror ("bind: ");
+		exit (1);
+	}
+
+	opt_val = 1;
+	setsockopt (client_set [260].listen_fd, SOL_SOCKET, SO_REUSEADDR, &opt_val, sizeof (opt_val));
+
+	if (listen (client_set [260].listen_fd, 5) < 0) {
+		perror ("listen: ");
+		exit (1);
+	}
+
+	/* Add the listening handle to the fixed read_fds. */
+	FD_SET (client_set [260].listen_fd, &fixed_read_fds);
+	if (client_set [260].listen_fd >= fixed_nfds) {
+		fixed_nfds = client_set [260].listen_fd + 1;
+	}
+}
+
+
+
+static void service_sockets (fd_set *read_fds)
+{
+	int	x;
+
+	/* Find the new client (if any). */
+	for (x = 0; x < 32; x++) {
+		if (FD_ISSET (client_set [x].listen_fd, read_fds)) {
+			/* Create a new client. */
+			struct client	*c = calloc (1, sizeof (*c));
+			struct sockaddr	addr;
+			socklen_t	addr_size = sizeof (addr);
+
+			c->fd = accept (client_set [x].listen_fd, &addr, &addr_size);
+
+			/* Make socket non-blocking. */
+			fcntl (c->fd, F_SETFL, O_NONBLOCK);
+
+#if 0
+			/* Add the listening handle to the fixed read_fds. */
+			FD_SET (client_set [x].listen_fd, &fixed_read_fds);
+			if (client_set [x].listen_fd >= fixed_nfds) {
+				fixed_nfds = client_set [x].listen_fd + 1;
+			}
+#endif
+
+			/* Insert at the head of the list. */
+			c->next = client_set [x].list;
+			if (c->next) {
+				c->next->prev = c;
+			}
+			client_set [x].list = c;
+		}
+	}
+
+#if 0
+	/*  Check if any client have transmitted data - if so just flush it. */
+	for (x = 0; x < 32; x++) {
+		struct client	*cnext = client_set [x].list;
+		struct client	*c = cnext;
+
+		while ((c = cnext)) {
+			cnext = c->next;
+
+			if (FD_ISSET (c->fd, read_fds)) {
+				char 	buf [4096];
+				int	y;
+
+				y = recv (c->fd, &buf, sizeof (buf), 0);
+			}
+		}
+	}
+#endif
+
+//	/* Check if any client have transmitted data on the control channel. */
+//	if (FD_ISSET (client_set [260].listen_
+}
+
+
+void write_socket (int sockno, int length, uint8_t *data)
+{
+	/* Send the packet to all subscribers of the sockno value. */
+	struct client	*cnext = client_set [sockno].list;
+	struct client	*c = cnext;
+	int		x;
+
+	client_set [sockno].packets++;
+	client_set [sockno].bytes += length;
+
+	while ((c = cnext)) {
+		cnext = c->next;
+
+		x = send (c->fd, data, length, 0);
 		if (x < 0) {
-			close (sockets [sockno]);
-			sockets [sockno] = -1;
+			/* The socket died. Clean up. */
+			close (c->fd);
+			FD_CLR (c->fd, &fixed_read_fds);
+
+			/* Remove it from the list. */
+			if (c->prev == NULL) {
+				/* First element in the list. */
+				client_set [sockno].list = c->next;
+				c->next->prev = NULL;
+
+				free (c);
+			} else {
+				/* Not the first element. */
+				c->prev->next = c->next;
+				if (c->next) {
+					c->next->prev = c->prev;
+				}
+
+				free (c);
+			}
 		}
 	}
 }
@@ -199,12 +343,7 @@ void deliver_packet (correlator_t *cor)
 		printf ("\n");
 
 		/* Deliver data to network socket. */
-		if (cor->packet_buf [2] == 0x11 || cor->packet_buf [2] == 0x13) {
-			write_socket (0, cor->packet_len - 5, &cor->packet_buf [3]);
-		} 
-		if (cor->packet_buf [2] == 0x12 || cor->packet_buf [2] == 0x14) {
-			write_socket (1, cor->packet_len - 5, &cor->packet_buf [3]);
-		} 
+		write_socket (cor->packet_buf [2], cor->packet_len - 5, &cor->packet_buf [3]);
 	//}
 }
 
@@ -341,16 +480,36 @@ int main (int argc, char **argv)
 {
 	float		val;
 	int		x;
+	int		active_fds;
 	correlator_t	*cor = new_correlator ();
+	fd_set		read_fds;
+	int		nfds;
 
 	init_trellis_encoder ();
+	init_sockets ();
 
 	/* Read samples from stdin. */
 	while (1) {
-		x = read (0, &val, sizeof (val));
-		if (x <= 0) break;
+		/* Prepare the select. */
+		read_fds = fixed_read_fds;
+		nfds = fixed_nfds;
+		FD_SET (0, &read_fds);
 
-		stuff_sample (cor, val * 100.0 + 128);	/* Convert from -1..0..+1 format to 0..127,128..255 format. */
+		active_fds = select (nfds, &read_fds, NULL, NULL, NULL);
+
+		/* Service the main input socket. */
+		if (FD_ISSET (0, &read_fds)) {
+			x = read (0, &val, sizeof (val));
+			if (x <= 0) break;
+
+			stuff_sample (cor, val * 100.0 + 128);	/* Convert from -1..0..+1 format to 0..127,128..255 format. */
+			active_fds--;
+		}
+
+		/* Handle all the other sockets if any may be available. */
+		if (active_fds > 0) {
+			service_sockets (&read_fds);
+		}
 	}
 
 	return 0;
