@@ -74,6 +74,7 @@ void MainWindow::makeParamList(void)
     id_list_all.push_back("strx::iqrec");
 
     id_list_fft.push_back("strx::fft");
+    id_list_fft.push_back("strx::snn");
 
     id_list_read.push_back("strx::frequency");
     id_list_read.push_back("strx::offset");
@@ -104,6 +105,9 @@ void MainWindow::refresh(void)
     {
         ui->plotter->setNewFttData(&knob_fft->value[0], knob_fft->value.size());
     }
+    knob = knob_map["strx::snn"];
+    knob_d = (GNURadio::KnobDPtr)(knob);
+    ui->snrLabel->setText(QString("SNR: %1 dB").arg(knob_d->value));
 
     // update frequencies and filters parameters at 1Hz
     if (!(cb_counter % 1))
