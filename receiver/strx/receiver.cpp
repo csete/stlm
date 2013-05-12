@@ -34,9 +34,10 @@
 #include "receiver.h"
 
 
-#define FFT_SIZE 4000
+#define FFT_SIZE     4000
+#define AUDIO_RATE  96000
 
-static long fft_delay_msec = 40;
+static long fft_delay_msec = 10;
 
 /*! \brief FFT thread function.
  *  \param rx The active instance of the receiver object.
@@ -124,11 +125,16 @@ receiver::receiver(const std::string name, const std::string input, const std::s
     taps = filter::firdes::low_pass(1.0, d_quad_rate, d_cutoff, d_cutoff);
     filter = filter::freq_xlating_fir_filter_ccf::make(2, taps, d_ch_offs[d_ch], d_quad_rate);
 
+    // audio SSI
+    trk_sig = analog::sig_source_f::make(AUDIO_RATE, analog::GR_SIN_WAVE, 10, 0.5, 0);
+    trk_snd = audio::sink::make(AUDIO_RATE, "pulse", true);
+
     // other blocks
     demod = analog::quadrature_demod_cf::make(1.f);
     iir = filter::single_pole_iir_filter_ff::make(1.e-3);
     sub = blocks::sub_ff::make();
     clock_recov = digital::clock_recovery_mm_ff::make(8.f, 10.e-3f, 10.e-3f, 1.e-3f, 10.e-3f);
+
 
     if (output.empty())
     {
@@ -152,7 +158,7 @@ receiver::receiver(const std::string name, const std::string input, const std::s
     // initialize SNR
     d_signal = -120.0;
     d_noise  = -120.0;
-    d_snr_alpha = 0.08;
+    d_snr_alpha = 0.1;
     d_snr_alpha_inv = 1.0 - d_snr_alpha;
     d_last_snr = 0.0;
 
@@ -532,6 +538,8 @@ void receiver::connect_all()
     tb->connect(iir, 0, sub, 1);
     tb->connect(sub, 0, clock_recov, 0);
     tb->connect(clock_recov, 0, fifo, 0);
+
+    tb->connect(trk_sig, 0, trk_snd, 0);
 }
 
 /*! \brief Process FFT data.
@@ -591,7 +599,7 @@ void receiver::process_fft(void)
 void receiver::process_snr(void)
 {
     double rbw = d_quad_rate / FFT_SIZE;   // FFT resolution bandwidth
-    int numbins = 100e3 / (int)rbw;
+    int numbins = 200e3 / (int)rbw;
     int startbin;
     int i;
     double sum = 0.;
@@ -629,7 +637,7 @@ void receiver::process_snr(void)
     d_last_snr *= d_snr_alpha_inv;
     d_last_snr += d_snr_alpha * this_snr;
 
-    snr_to_freq(d_last_snr);
+    trk_sig->set_frequency(snr_to_freq(d_last_snr));
 }
 
 /*! Convert SNR to audio frequency. */
@@ -637,7 +645,7 @@ double receiver::snr_to_freq(double snr)
 {
 #define SNR_MIN  5.0
 #define SNR_MAX 30.0
-#define F_MIN   10.0
+#define F_MIN   300.0
 #define F_MAX   1.e3
 #define SLOPE (F_MAX-F_MIN)/(SNR_MAX-SNR_MIN)
 
@@ -648,7 +656,7 @@ double receiver::snr_to_freq(double snr)
     else if (snr < SNR_MIN)
         snr = SNR_MIN;
 
-    freq_out = 10.0 + SLOPE * (snr-SNR_MIN);
+    freq_out = F_MIN + SLOPE * (snr-SNR_MIN);
 
     std::cout << snr << " dB => " << freq_out << std::endl;
 

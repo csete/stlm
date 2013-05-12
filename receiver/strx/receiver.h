@@ -30,6 +30,9 @@
 
 // GNU Radio includes
 #include <analog/quadrature_demod_cf.h>
+#include <analog/sig_source_f.h>
+#include <analog/sig_source_waveform.h>
+#include <audio/sink.h>
 #include <blocks/file_sink.h>
 #include <blocks/sub_ff.h>
 #include <config.h>
@@ -144,6 +147,10 @@ private:
     digital::clock_recovery_mm_ff::sptr        clock_recov; /*!< M&M clock recovery block .*/
     blocks::file_sink::sptr                    iqrec;   /*!< I/Q recorder block. */
     blocks::file_sink::sptr                    fifo;    /*!< Demodulator output. */
+
+    // audio SSI blocks
+    analog::sig_source_f::sptr                 trk_sig;  /*!< Audio signal source. */
+    audio::sink::sptr                          trk_snd;  /*!< Audio output. */
 
     std::string d_name; /*!< Receiver name. */
     bool d_running;
