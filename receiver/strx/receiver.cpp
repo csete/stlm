@@ -628,6 +628,31 @@ void receiver::process_snr(void)
     // single pole iir
     d_last_snr *= d_snr_alpha_inv;
     d_last_snr += d_snr_alpha * this_snr;
+
+    snr_to_freq(d_last_snr);
+}
+
+/*! Convert SNR to audio frequency. */
+double receiver::snr_to_freq(double snr)
+{
+#define SNR_MIN  5.0
+#define SNR_MAX 30.0
+#define F_MIN   10.0
+#define F_MAX   1.e3
+#define SLOPE (F_MAX-F_MIN)/(SNR_MAX-SNR_MIN)
+
+    double freq_out;
+
+    if (snr > SNR_MAX)
+        snr = SNR_MAX;
+    else if (snr < SNR_MIN)
+        snr = SNR_MIN;
+
+    freq_out = 10.0 + SLOPE * (snr-SNR_MIN);
+
+    std::cout << snr << " dB => " << freq_out << std::endl;
+
+    return freq_out;
 }
 
 /*! \brief Enable or disable I/Q recording.
