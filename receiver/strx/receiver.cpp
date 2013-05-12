@@ -152,7 +152,7 @@ receiver::receiver(const std::string name, const std::string input, const std::s
     // initialize SNR
     d_signal = -120.0;
     d_noise  = -120.0;
-    d_snr_alpha = 0.1;
+    d_snr_alpha = 0.08;
     d_snr_alpha_inv = 1.0 - d_snr_alpha;
     d_last_snr = 0.0;
 
