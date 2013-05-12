@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <string.h>
+#include <errno.h>
 
 #include <fcntl.h>
 #include <sys/types.h>
@@ -61,6 +62,7 @@ struct client_set {
 
 struct client_set client_set [270];	/* Array of client sockets. */
 
+uint8_t	last_housekeeping [100];	/* Buffer to hold the last received housekeeping packet. */
 
 
 static void init_sockets (void)
@@ -136,6 +138,31 @@ static void init_sockets (void)
 }
 
 
+static void dump_telemetry (int fd)
+{
+	char		buf [100];
+	char		*bc = buf;
+	uint32_t	upt = last_housekeeping [1] + (last_housekeeping [2] << 8) + (last_housekeeping [3] << 16) + (last_housekeeping [4] << 24);
+	float		vbat = 3.0 * (last_housekeeping [5] + (last_housekeeping [6] << 8)) * (3.3 / 4095.0);
+	int		x;
+
+	/* Forst dump some info from the housekeeping block. */
+	bc += sprintf (bc, "TX: %d  Uptime: %d.%d  Vbat: %5.2f  Flags: %04X",
+			   last_housekeeping [0],
+			   upt / 10, upt % 10,
+			   vbat,
+			   last_housekeeping [7] + (last_housekeeping [8] << 8));
+
+	for (x = 0; x < 256; x++) {
+		if (client_set [x].packets > 0) {
+			bc += sprintf (bc, "\t%d:%llu,%llu", x, client_set [x].packets, client_set [x].bytes);
+		}
+	}
+	bc += sprintf (bc, "\n");
+
+	send (fd, buf, (bc - buf), 0);
+}
+
 
 static void service_sockets (fd_set *read_fds)
 {
@@ -154,13 +181,11 @@ static void service_sockets (fd_set *read_fds)
 			/* Make socket non-blocking. */
 			fcntl (c->fd, F_SETFL, O_NONBLOCK);
 
-#if 0
 			/* Add the listening handle to the fixed read_fds. */
-			FD_SET (client_set [x].listen_fd, &fixed_read_fds);
-			if (client_set [x].listen_fd >= fixed_nfds) {
-				fixed_nfds = client_set [x].listen_fd + 1;
+			FD_SET (c->fd, &fixed_read_fds);
+			if (c->fd >= fixed_nfds) {
+				fixed_nfds = c->fd + 1;
 			}
-#endif
 
 			/* Insert at the head of the list. */
 			c->next = client_set [x].list;
@@ -171,7 +196,6 @@ static void service_sockets (fd_set *read_fds)
 		}
 	}
 
-#if 0
 	/*  Check if any client have transmitted data - if so just flush it. */
 	for (x = 0; x < 32; x++) {
 		struct client	*cnext = client_set [x].list;
@@ -185,13 +209,59 @@ static void service_sockets (fd_set *read_fds)
 				int	y;
 
 				y = recv (c->fd, &buf, sizeof (buf), 0);
+				if (y < 0) {
+					/* Ditch this user. */
+				}
 			}
 		}
 	}
-#endif
 
-//	/* Check if any client have transmitted data on the control channel. */
-//	if (FD_ISSET (client_set [260].listen_
+	/* Check if any client have transmitted data on the control channel. */
+	if (FD_ISSET (client_set [260].listen_fd, read_fds)) {
+		/* Create a new client. */
+		struct client	*c = calloc (1, sizeof (*c));
+		struct sockaddr	addr;
+		socklen_t	addr_size = sizeof (addr);
+
+		c->fd = accept (client_set [260].listen_fd, &addr, &addr_size);
+
+		/* Make socket non-blocking. */
+		fcntl (c->fd, F_SETFL, O_NONBLOCK);
+
+		/* Add the real handle to the fixed read_fds. */
+		FD_SET (c->fd, &fixed_read_fds);
+		if (c->fd >= fixed_nfds) {
+			fixed_nfds = c->fd + 1;
+		}
+
+		/* Insert at the head of the list. */
+		c->next = client_set [260].list;
+		if (c->next) {
+			c->next->prev = c;
+		}
+		client_set [260].list = c;
+	}
+
+	/* Check if any data is received on the monitor port. */
+	{
+		struct client	*cnext = client_set [260].list;
+		struct client	*c = cnext;
+
+		while ((c = cnext)) {
+			cnext = c->next;
+
+			if (FD_ISSET (c->fd, read_fds)) {
+				char 	buf [4096];
+				int	y;
+
+				y = recv (c->fd, &buf, sizeof (buf), 0);
+				if (y > 0) {
+					/* Something received. Dump telemetry status. */
+					dump_telemetry (c->fd);
+				}
+			}
+		}
+	}
 }
 
 
@@ -344,6 +414,11 @@ void deliver_packet (correlator_t *cor)
 
 		/* Deliver data to network socket. */
 		write_socket (cor->packet_buf [2], cor->packet_len - 5, &cor->packet_buf [3]);
+
+		if (cor->packet_buf [2] <= 3) {
+			/* This is a housekeeping packet. Keep the last one around. */
+			memcpy (last_housekeeping, &cor->packet_buf [2], cor->packet_len - 4);
+		}
 	//}
 }
 
@@ -496,6 +571,14 @@ int main (int argc, char **argv)
 		FD_SET (0, &read_fds);
 
 		active_fds = select (nfds, &read_fds, NULL, NULL, NULL);
+
+		if (active_fds == -1) {
+			if (errno == EINTR || errno == EAGAIN) {
+				continue;	/* Interrupted system call. Just retry. */
+			}
+			perror ("select: ");
+			exit (2);
+		}
 
 		/* Service the main input socket. */
 		if (FD_ISSET (0, &read_fds)) {
