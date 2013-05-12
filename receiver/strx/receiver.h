@@ -103,6 +103,7 @@ public:
     void process_fft(void);
     void process_snr(void);
     double snr_to_freq(double snr);
+    double snr_to_ampl(double snr);
 
     std::vector<float> get_fft_data(void);
     double get_snr(void);

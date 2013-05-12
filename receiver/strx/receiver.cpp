@@ -638,13 +638,16 @@ void receiver::process_snr(void)
     d_last_snr += d_snr_alpha * this_snr;
 
     trk_sig->set_frequency(snr_to_freq(d_last_snr));
+    trk_sig->set_amplitude(snr_to_ampl(d_last_snr));
 }
+
+
+#define SNR_MIN  5.0
+#define SNR_MAX 30.0
 
 /*! Convert SNR to audio frequency. */
 double receiver::snr_to_freq(double snr)
 {
-#define SNR_MIN  5.0
-#define SNR_MAX 30.0
 #define F_MIN   300.0
 #define F_MAX   1.e3
 #define SLOPE (F_MAX-F_MIN)/(SNR_MAX-SNR_MIN)
@@ -658,9 +661,28 @@ double receiver::snr_to_freq(double snr)
 
     freq_out = F_MIN + SLOPE * (snr-SNR_MIN);
 
-    std::cout << snr << " dB => " << freq_out << std::endl;
-
     return freq_out;
+}
+
+/*! Convert SNR to audio amplitude. */
+double receiver::snr_to_ampl(double snr)
+{
+#define DB_MIN  -30.0
+#define DB_MAX  -2.0
+#define SLOPE (DB_MAX-DB_MIN)/(SNR_MAX-SNR_MIN)
+
+    double ampl_db;
+    double ampl_out = 0.5;
+
+    if (snr > SNR_MAX)
+        snr = SNR_MAX;
+    else if (snr < SNR_MIN)
+        snr = SNR_MIN;
+
+    ampl_db = DB_MIN + SLOPE * (snr-SNR_MIN);  // dB below 1.0
+    ampl_out = pow(10.0, ampl_db / 20.0);      // linear gain
+
+    return ampl_out;
 }
 
 /*! \brief Enable or disable I/Q recording.
