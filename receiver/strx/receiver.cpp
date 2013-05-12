@@ -20,6 +20,7 @@
 
 // Standard includes
 #include <time.h>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -32,6 +33,8 @@
 #endif
 #include "receiver.h"
 
+
+#define FFT_SIZE 4000
 
 static long fft_delay_msec = 40;
 
@@ -107,7 +110,7 @@ receiver::receiver(const std::string name, const std::string input, const std::s
     tb = gr_make_top_block(d_name);
 
     src = strx::source_c::make(input, d_quad_rate);
-    fft = strx::fft_c::make();
+    fft = strx::fft_c::make(FFT_SIZE);
     iqrec = blocks::file_sink::make(sizeof(gr_complex), "/tmp/strx.raw");
     iqrec->set_unbuffered(true);
     iqrec->close();
@@ -146,6 +149,13 @@ receiver::receiver(const std::string name, const std::string input, const std::s
     for (int i = 0; i < MAX_FFT_SIZE; i++)
         d_iirFftData[i] = -120.0f;  // dBFS
 
+    // initialize SNR
+    d_signal = -120.0;
+    d_noise  = -120.0;
+    d_snr_alpha = 0.1;
+    d_snr_alpha_inv = 1.0 - d_snr_alpha;
+    d_last_snr = 0.0;
+
     // initialize control port
 #ifdef GR_CTRLPORT
     add_rpc_variable(rpcbasic_sptr(new rpcbasic_register_get<receiver, double>
@@ -162,6 +172,7 @@ receiver::receiver(const std::string name, const std::string input, const std::s
             )
     ));
 
+    // FFT
     add_rpc_variable(rpcbasic_sptr(new rpcbasic_register_get<receiver, std::vector<float> >
             (
                 d_name,   // const std::string& name,
@@ -173,6 +184,23 @@ receiver::receiver(const std::string name, const std::string input, const std::s
                 pmt::make_f32vector(0, -120.0f),
                 "dBFS", // const char* units_ = "",
                 "Baseband FFT", // const char* desc_ = "",
+                RPC_PRIVLVL_MIN,
+                DISPXY | DISPOPTSCATTER
+            )
+    ));
+
+    // SNR
+    add_rpc_variable(rpcbasic_sptr(new rpcbasic_register_get<receiver, double>
+            (
+                d_name,   // const std::string& name,
+                "snn",  // const char* functionbase,
+                this,      // T* obj,
+                &receiver::get_snr, // Tfrom (T::*function)(),
+                pmt::mp(0.0),
+                pmt::mp(100.0),
+                pmt::mp(0.0),
+                "dB", // const char* units_ = "",
+                "Signal+noise to noise ratio", // const char* desc_ = "",
                 RPC_PRIVLVL_MIN,
                 DISPXY | DISPOPTSCATTER
             )
@@ -487,6 +515,11 @@ std::vector<float> receiver::get_fft_data(void)
     }
 }
 
+double receiver::get_snr(void)
+{
+    return d_last_snr;
+}
+
 /*! Connect all blocks in the receiver chain. */
 void receiver::connect_all()
 {
@@ -557,6 +590,44 @@ void receiver::process_fft(void)
 /*! \brief Calculate signal to noise ratios. */
 void receiver::process_snr(void)
 {
+    double rbw = d_quad_rate / FFT_SIZE;   // FFT resolution bandwidth
+    int numbins = 100e3 / (int)rbw;
+    int startbin;
+    int i;
+    double sum = 0.;
+    double noise, signal;
+
+    if (d_fftLen <= 0)
+        return;
+
+    fft_lock.lock();
+
+    // average noise power calculated around 0 Hz
+    startbin = d_fftLen/2 - numbins/2;
+    for (i = startbin; i < startbin + numbins; i++)
+    {
+        sum += (double)d_realFftData[i];
+    }
+    d_noise = sum / (double) numbins;
+
+    // average signal power calculated around offset
+    sum = 0.;
+    startbin += (int)(d_ch_offs[d_ch] / rbw) - numbins/2;
+    for (i = startbin; i < startbin + numbins; i++)
+    {
+        sum += (double)d_realFftData[i];
+    }
+    fft_lock.unlock();
+
+    d_signal = sum / (double) numbins;
+
+    double this_snr = d_signal - d_noise;
+    if (this_snr < 0.0)
+        this_snr = 0.0;
+
+    // single pole iir
+    d_last_snr *= d_snr_alpha_inv;
+    d_last_snr += d_snr_alpha * this_snr;
 }
 
 /*! \brief Enable or disable I/Q recording.

@@ -101,6 +101,7 @@ public:
     void process_snr(void);
 
     std::vector<float> get_fft_data(void);
+    double get_snr(void);
 
     void iqrec_enable(int enable);
     int iqrec_enabled(void);
@@ -163,6 +164,13 @@ private:
     float *d_iirFftData;  /** FIXME: use vector */
     float  d_fftAvg;      /*!< FFT averaging parameter set by user (not the true gain). */
     int    d_recording;   /*!< I/Q recording enabled. */
+
+    // SNR stuff;
+    double d_signal;    /*!< Average signal level in dBFS. */
+    double d_noise;     /*!< Average noise level in dBFS. */
+    double d_snr_alpha; /*!< LP filter alpha. */
+    double d_snr_alpha_inv;
+    double d_last_snr;  /*!< Last SNR. */
 };
 
 #endif // RECEIVER_H
