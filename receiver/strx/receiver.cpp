@@ -126,7 +126,7 @@ receiver::receiver(const std::string name, const std::string input, const std::s
     filter = filter::freq_xlating_fir_filter_ccf::make(2, taps, d_ch_offs[d_ch], d_quad_rate);
 
     // audio SSI
-    trk_sig = analog::sig_source_f::make(AUDIO_RATE, analog::GR_SIN_WAVE, 10, 0.5, 0);
+    trk_sig = analog::sig_source_f::make(AUDIO_RATE, analog::GR_SIN_WAVE, 700, 0.5, 0);
     trk_snd = audio::sink::make(AUDIO_RATE, "pulse", true);
 
     // other blocks
@@ -638,7 +638,7 @@ void receiver::process_snr(void)
     d_last_snr += d_snr_alpha * this_snr;
 
     trk_sig->set_frequency(snr_to_freq(d_last_snr));
-    trk_sig->set_amplitude(snr_to_ampl(d_last_snr));
+    //trk_sig->set_amplitude(snr_to_ampl(d_last_snr));
 }
 
 
@@ -648,8 +648,8 @@ void receiver::process_snr(void)
 /*! Convert SNR to audio frequency. */
 double receiver::snr_to_freq(double snr)
 {
-#define F_MIN   300.0
-#define F_MAX   1.e3
+#define F_MIN   400.0
+#define F_MAX   800.0
 #define SLOPE (F_MAX-F_MIN)/(SNR_MAX-SNR_MIN)
 
     double freq_out;
