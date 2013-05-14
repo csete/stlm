@@ -5,12 +5,15 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <string.h>
-
+#include <errno.h>
+#include <time.h>
+#include <signal.h>
 #include <fcntl.h>
+
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <netinet/in.h>
-
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
@@ -61,6 +64,26 @@ struct client_set {
 
 struct client_set client_set [270];	/* Array of client sockets. */
 
+uint8_t	last_housekeeping [100];	/* Buffer to hold the last received housekeeping packet. */
+
+/* Macro to insert a entry into a list. */
+#define INSERT_INTO_LIST(list,element) do { \
+	element->next = list; \
+	if (element->next) element->next->prev = element; \
+	list = element; \
+} while (0)
+
+/* Macro to remove a entry from a list. */
+#define REMOVE_FROM_LIST(list,element) do { \
+	if (element->prev == NULL) {	/* First element in the list. */ \
+		list = element->next; \
+		if (element->next) element->next->prev = NULL; \
+	} else {	/* Not the first element. */ \
+		element->prev->next = element->next; \
+		if (element->next) element->next->prev = element->prev; \
+	} \
+} while (0)
+
 
 
 static void init_sockets (void)
@@ -81,6 +104,10 @@ static void init_sockets (void)
 			perror ("socket: ");
 			exit (1);
 		}
+
+		opt_val = 1;
+		setsockopt (client_set [x].listen_fd, SOL_SOCKET, SO_REUSEADDR, &opt_val, sizeof (opt_val));
+
 		addr.sin_addr.s_addr = INADDR_ANY;
 		addr.sin_port = htons (4000 + x);
 		addr.sin_family = AF_INET;
@@ -89,9 +116,6 @@ static void init_sockets (void)
 			perror ("bind: ");
 			exit (1);
 		}
-
-		opt_val = 1;
-		setsockopt (client_set [x].listen_fd, SOL_SOCKET, SO_REUSEADDR, &opt_val, sizeof (opt_val));
 
 		if (listen (client_set [x].listen_fd, 5) < 0) {
 			perror ("listen: ");
@@ -111,6 +135,10 @@ static void init_sockets (void)
 		perror ("socket: ");
 		exit (1);
 	}
+
+	opt_val = 1;
+	setsockopt (client_set [260].listen_fd, SOL_SOCKET, SO_REUSEADDR, &opt_val, sizeof (opt_val));
+
 	addr.sin_addr.s_addr = INADDR_ANY;
 	addr.sin_port = htons (5000);
 	addr.sin_family = AF_INET;
@@ -119,9 +147,6 @@ static void init_sockets (void)
 		perror ("bind: ");
 		exit (1);
 	}
-
-	opt_val = 1;
-	setsockopt (client_set [260].listen_fd, SOL_SOCKET, SO_REUSEADDR, &opt_val, sizeof (opt_val));
 
 	if (listen (client_set [260].listen_fd, 5) < 0) {
 		perror ("listen: ");
@@ -135,6 +160,31 @@ static void init_sockets (void)
 	}
 }
 
+
+static int dump_telemetry (int fd)
+{
+	char		buf [10000];
+	char		*bc = buf;
+	uint32_t	upt = last_housekeeping [1] + (last_housekeeping [2] << 8) + (last_housekeeping [3] << 16) + (last_housekeeping [4] << 24);
+	float		vbat = ((24.9+4.7)/4.7) * (last_housekeeping [5] + (last_housekeeping [6] << 8)) * (3.3 / 4095.0);
+	int		x;
+
+	/* Forst dump some info from the housekeeping block. */
+	bc += sprintf (bc, "TX: %d  Uptime: %d.%d  Vbat: %5.2f  Flags: %04X",
+			   last_housekeeping [0],
+			   upt / 10, upt % 10,
+			   vbat,
+			   last_housekeeping [7] + (last_housekeeping [8] << 8));
+
+	for (x = 0; x < 256; x++) {
+		if (client_set [x].packets > 0) {
+			bc += sprintf (bc, "\t%d:%llu,%llu", x, client_set [x].packets, client_set [x].bytes);
+		}
+	}
+	bc += sprintf (bc, "\n");
+
+	return send (fd, buf, (bc - buf), MSG_NOSIGNAL);
+}
 
 
 static void service_sockets (fd_set *read_fds)
@@ -154,24 +204,17 @@ static void service_sockets (fd_set *read_fds)
 			/* Make socket non-blocking. */
 			fcntl (c->fd, F_SETFL, O_NONBLOCK);
 
-#if 0
 			/* Add the listening handle to the fixed read_fds. */
-			FD_SET (client_set [x].listen_fd, &fixed_read_fds);
-			if (client_set [x].listen_fd >= fixed_nfds) {
-				fixed_nfds = client_set [x].listen_fd + 1;
+			FD_SET (c->fd, &fixed_read_fds);
+			if (c->fd >= fixed_nfds) {
+				fixed_nfds = c->fd + 1;
 			}
-#endif
 
 			/* Insert at the head of the list. */
-			c->next = client_set [x].list;
-			if (c->next) {
-				c->next->prev = c;
-			}
-			client_set [x].list = c;
+			INSERT_INTO_LIST (client_set [x].list, c);
 		}
 	}
 
-#if 0
 	/*  Check if any client have transmitted data - if so just flush it. */
 	for (x = 0; x < 32; x++) {
 		struct client	*cnext = client_set [x].list;
@@ -185,13 +228,86 @@ static void service_sockets (fd_set *read_fds)
 				int	y;
 
 				y = recv (c->fd, &buf, sizeof (buf), 0);
+				if (y < 0 && errno != EINTR && errno != EAGAIN) {
+					/* Read error. Ditch this user. */
+					close (c->fd);
+					FD_CLR (c->fd, &fixed_read_fds);
+					REMOVE_FROM_LIST (client_set [x].list, c);
+					free (c);
+				} else if (y == 0) {
+					/* EOF. */
+					close (c->fd);
+					FD_CLR (c->fd, &fixed_read_fds);
+					REMOVE_FROM_LIST (client_set [x].list, c);
+					free (c);
+				}
 			}
 		}
 	}
-#endif
 
-//	/* Check if any client have transmitted data on the control channel. */
-//	if (FD_ISSET (client_set [260].listen_
+	/* Check if any client have transmitted data on the control channel. */
+	if (FD_ISSET (client_set [260].listen_fd, read_fds)) {
+		/* Create a new client. */
+		struct client	*c = calloc (1, sizeof (*c));
+		struct sockaddr	addr;
+		socklen_t	addr_size = sizeof (addr);
+
+		c->fd = accept (client_set [260].listen_fd, &addr, &addr_size);
+		if (c->fd >= 0) {
+			/* Make socket non-blocking. */
+			fcntl (c->fd, F_SETFL, O_NONBLOCK);
+
+			/* Add the real handle to the fixed read_fds. */
+			FD_SET (c->fd, &fixed_read_fds);
+			if (c->fd >= fixed_nfds) {
+				fixed_nfds = c->fd + 1;
+			}
+
+			/* Insert at the head of the list. */
+			INSERT_INTO_LIST (client_set [260].list, c);
+		}
+	}
+
+	/* Check if any data is received on the monitor port. */
+	{
+		struct client	*cnext = client_set [260].list;
+		struct client	*c;
+
+		while ((c = cnext)) {
+			cnext = c->next;
+
+			if (FD_ISSET (c->fd, read_fds)) {
+				char 	buf [4096];
+				int	y;
+
+				y = recv (c->fd, &buf, sizeof (buf), 0);
+				if (y < 0) {
+					if (errno != EINTR && errno != EAGAIN) {
+						/* Monitor client disappeared. Close down. */
+						close (c->fd);
+						FD_CLR (c->fd, &fixed_read_fds);
+						REMOVE_FROM_LIST (client_set [260].list, c);
+						free (c);
+					}
+				} else if (y == 0) {
+					/* EOF. */
+					close (c->fd);
+					FD_CLR (c->fd, &fixed_read_fds);
+					REMOVE_FROM_LIST (client_set [260].list, c);
+					free (c);
+				} else if (y > 0) {
+					/* Something received. Dump telemetry status. */
+					if (dump_telemetry (c->fd) < 0) {
+						/* Monitor client disappeared. Close down. */
+						close (c->fd);
+						FD_CLR (c->fd, &fixed_read_fds);
+						REMOVE_FROM_LIST (client_set [260].list, c);
+						free (c);
+					}
+				}
+			}
+		}
+	}
 }
 
 
@@ -208,7 +324,7 @@ void write_socket (int sockno, int length, uint8_t *data)
 	while ((c = cnext)) {
 		cnext = c->next;
 
-		x = send (c->fd, data, length, 0);
+		x = send (c->fd, data, length, MSG_NOSIGNAL);
 		if (x < 0) {
 			/* The socket died. Clean up. */
 			close (c->fd);
@@ -218,7 +334,9 @@ void write_socket (int sockno, int length, uint8_t *data)
 			if (c->prev == NULL) {
 				/* First element in the list. */
 				client_set [sockno].list = c->next;
-				c->next->prev = NULL;
+				if (c->next) {
+					c->next->prev = NULL;
+				}
 
 				free (c);
 			} else {
@@ -331,20 +449,30 @@ static correlator_t *new_correlator (void)
  */
 void deliver_packet (correlator_t *cor)
 {
-	int	x;
+	int		x;
+	char		t [100];
+	struct timeval	tv;
 
-	//if (cor->packet_buf [4] != 1) {
-		printf ("pbit: %5d  flag err: %1d  trellis err: %2u  ", cor->pbit, cor->flag_err, cor->trellis_err);
-		printf ("Len: %3d  Len2: %3d  CRC: %04X  ID: %3u", cor->packet_buf [0], cor->packet_buf [1] ^ 0xFF, (cor->packet_buf [cor->packet_len - 2]<<8) | cor->packet_buf [cor->packet_len - 1], cor->packet_buf [2]);
-		printf ("  Packet:");
-		for (x = 0; x  < cor->packet_len; x++) {
-			printf (" %02X", cor->packet_buf [x]);
-		}
-		printf ("\n");
+	/* Print a timestamp. */
+	gettimeofday (&tv, NULL);
+	strftime (t, sizeof (t), "%F %T", gmtime (&tv.tv_sec));
+	printf ("%s.%03ld ", t, tv.tv_usec / 1000);
 
-		/* Deliver data to network socket. */
-		write_socket (cor->packet_buf [2], cor->packet_len - 5, &cor->packet_buf [3]);
-	//}
+	printf ("pbit: %5d  flag err: %1d  trellis err: %2u  ", cor->pbit, cor->flag_err, cor->trellis_err);
+	printf ("Len: %3d  Len2: %3d  CRC: %04X  ID: %3u", cor->packet_buf [0], cor->packet_buf [1] ^ 0xFF, (cor->packet_buf [cor->packet_len - 2]<<8) | cor->packet_buf [cor->packet_len - 1], cor->packet_buf [2]);
+	printf ("  Packet:");
+	for (x = 0; x  < cor->packet_len; x++) {
+		printf (" %02X", cor->packet_buf [x]);
+	}
+	printf ("\n");
+
+	/* Deliver data to network socket. */
+	write_socket (cor->packet_buf [2], cor->packet_len - 5, &cor->packet_buf [3]);
+
+	if (cor->packet_buf [2] <= 3) {
+		/* This is a housekeeping packet. Keep the last one around. */
+		memcpy (last_housekeeping, &cor->packet_buf [2], cor->packet_len - 4);
+	}
 }
 
 
@@ -478,12 +606,16 @@ printf ("Header error: len1: %3d  len2: %3d\n", cor->packet_buf [0], cor->packet
 
 int main (int argc, char **argv)
 {
-	float		val;
+	uint8_t		input_buffer [65536];
+	unsigned int	input_offset = 0;
 	int		x;
 	int		active_fds;
 	correlator_t	*cor = new_correlator ();
 	fd_set		read_fds;
 	int		nfds;
+
+	/* Ignore SIGPIPE interrupts. */
+	signal (SIGPIPE, SIG_IGN);
 
 	init_trellis_encoder ();
 	init_sockets ();
@@ -497,12 +629,36 @@ int main (int argc, char **argv)
 
 		active_fds = select (nfds, &read_fds, NULL, NULL, NULL);
 
+		if (active_fds == -1) {
+			if (errno == EINTR || errno == EAGAIN) {
+				continue;	/* Interrupted system call. Just retry. */
+			}
+			perror ("select: ");
+			exit (2);
+		}
+
 		/* Service the main input socket. */
 		if (FD_ISSET (0, &read_fds)) {
-			x = read (0, &val, sizeof (val));
+			float	*v;
+
+			x = read (0, &input_buffer [input_offset], sizeof (input_buffer) - input_offset);
 			if (x <= 0) break;
 
-			stuff_sample (cor, val * 100.0 + 128);	/* Convert from -1..0..+1 format to 0..127,128..255 format. */
+			v = (float *)&input_buffer [0];
+			x += input_offset;
+			while (x >= sizeof (*v)) {
+				stuff_sample (cor, *v * 100.0 + 128);	/* Convert from -1..0..+1 format to 0..127,128..255 format. */
+				x -= sizeof (*v);
+				v++;
+			}
+			input_offset = 0;
+			if (x > 0) {
+				/* Partial read of the last value. Move it to the head of the buffer and prepare for the next batch. */
+				uint8_t	*p = (void *)v;
+				while (x-- > 0) {
+					input_buffer [input_offset++] = *(p++);
+				}
+			}
 			active_fds--;
 		}
 
