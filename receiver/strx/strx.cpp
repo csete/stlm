@@ -102,7 +102,7 @@ int main(int argc, char **argv)
     }
 
     // create receiver and set paarameters
-    rx = new receiver(rxname, input, output);
+    rx = new receiver(rxname, input, output, 4.e6);
 
     if (vm.count("freq"))
     {

@@ -70,7 +70,7 @@ class receiver
 
 public:
 
-    receiver(const std::string name="", const std::string input="", const std::string output="", double quad_rate=4.e6);
+    receiver(const std::string name, const std::string input, const std::string output, double quad_rate);
     ~receiver();
 
     void start();
