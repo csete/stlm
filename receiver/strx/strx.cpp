@@ -72,6 +72,7 @@ int main(int argc, char **argv)
     std::string rxname;
     std::string input;
     std::string output;
+    std::string audio_out;
 
     po::options_description desc("Command line options");
     desc.add_options()
@@ -83,6 +84,7 @@ int main(int argc, char **argv)
         ("gain,g", po::value<double>(&gain), "RF/IF gain in dB")
         ("lnb,l", po::value<std::string>(&lnb_str), "LNB LO frequency in Hz or using G, M, k suffix")
         ("output,o", po::value<std::string>(&output)->default_value(""), "Output file (use stdout if omitted)")
+        ("audio", po::value<std::string>(&audio_out)->default_value("none"), "Audio output device (e.g. pulse, none)")
     ;
     po::variables_map vm;
     try
@@ -102,7 +104,7 @@ int main(int argc, char **argv)
     }
 
     // create receiver and set paarameters
-    rx = new receiver(rxname, input, output, 4.e6);
+    rx = new receiver(rxname, input, output, audio_out, 4.e6);
 
     if (vm.count("freq"))
     {

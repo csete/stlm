@@ -94,7 +94,8 @@ const char* currentDateTime() {
  * 
  * \todo Use gr-osmosdr as soon as it support gnuradio 3.7
  */
-receiver::receiver(const std::string name, const std::string input, const std::string output, double quad_rate)
+receiver::receiver(const std::string name, const std::string input, const std::string output,
+                   const std::string audio_out, double quad_rate)
 {
 
     if (name.empty())
@@ -126,8 +127,16 @@ receiver::receiver(const std::string name, const std::string input, const std::s
     filter = filter::freq_xlating_fir_filter_ccf::make(2, taps, d_ch_offs[d_ch], d_quad_rate);
 
     // audio SSI
-    trk_sig = analog::sig_source_f::make(AUDIO_RATE, analog::GR_SIN_WAVE, 700, 0.5, 0);
-    trk_snd = audio::sink::make(AUDIO_RATE, "pulse", true);
+    if (audio_out == "none")
+    {
+        d_use_audio = false;
+    }
+    else
+    {
+        d_use_audio = true;
+        trk_sig = analog::sig_source_f::make(AUDIO_RATE, analog::GR_SIN_WAVE, 700, 0.5, 0);
+        trk_snd = audio::sink::make(AUDIO_RATE, audio_out, true);
+    }
 
     // other blocks
     demod = analog::quadrature_demod_cf::make(1.f);
@@ -539,7 +548,10 @@ void receiver::connect_all()
     tb->connect(sub, 0, clock_recov, 0);
     tb->connect(clock_recov, 0, fifo, 0);
 
-    tb->connect(trk_sig, 0, trk_snd, 0);
+    if (d_use_audio)
+    {
+        tb->connect(trk_sig, 0, trk_snd, 0);
+    }
 }
 
 /*! \brief Process FFT data.
@@ -637,8 +649,11 @@ void receiver::process_snr(void)
     d_last_snr *= d_snr_alpha_inv;
     d_last_snr += d_snr_alpha * this_snr;
 
-    trk_sig->set_frequency(snr_to_freq(d_last_snr));
-    //trk_sig->set_amplitude(snr_to_ampl(d_last_snr));
+    if (d_use_audio)
+    {
+        trk_sig->set_frequency(snr_to_freq(d_last_snr));
+        //trk_sig->set_amplitude(snr_to_ampl(d_last_snr));
+    }
 }
 
 

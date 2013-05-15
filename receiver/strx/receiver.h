@@ -70,7 +70,8 @@ class receiver
 
 public:
 
-    receiver(const std::string name, const std::string input, const std::string output, double quad_rate);
+    receiver(const std::string name, const std::string input, const std::string output,
+             const std::string audio_out, double quad_rate);
     ~receiver();
 
     void start();
@@ -175,6 +176,7 @@ private:
     int    d_recording;   /*!< I/Q recording enabled. */
 
     // SNR stuff;
+    bool   d_use_audio; /*!< Whether we use audio SNR or not. */
     double d_signal;    /*!< Average signal level in dBFS. */
     double d_noise;     /*!< Average noise level in dBFS. */
     double d_snr_alpha; /*!< LP filter alpha. */
