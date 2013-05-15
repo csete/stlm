@@ -37,7 +37,7 @@
 #define FFT_SIZE     4000
 #define AUDIO_RATE  96000
 
-static long fft_delay_msec = 10;
+static long fft_delay_msec = 40;
 
 /*! \brief FFT thread function.
  *  \param rx The active instance of the receiver object.
