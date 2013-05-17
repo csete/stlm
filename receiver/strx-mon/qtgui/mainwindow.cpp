@@ -107,7 +107,7 @@ void MainWindow::refresh(void)
     }
     knob = knob_map["strx::snn"];
     knob_d = (GNURadio::KnobDPtr)(knob);
-    ui->snrLabel->setText(QString("SNR: %1 dB").arg(knob_d->value));
+    ui->snrLabel->setText(QString("%1 dB").arg(knob_d->value, 4, 'f', 1));
 
     // update frequencies and filters parameters at 1Hz
     if (!(cb_counter % 1))
