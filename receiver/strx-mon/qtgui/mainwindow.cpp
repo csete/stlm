@@ -188,6 +188,7 @@ void MainWindow::on_recButton_toggled(bool checked)
     int chk = checked ? 1 : 0;
     if (knob_i->value != chk)
     {
+        knob_map.erase("strx::channel"); // avoid writing channel
         knob_i->value = chk;
         ctrlport->set(knob_map);
     }
@@ -208,6 +209,9 @@ void MainWindow::on_chanButton_clicked(void)
         knob_i->value = 0;
     else
         knob_i->value = 1;
+
+    // avoid toggling recorder
+    knob_map.erase("strx::iqrec");
 
     // send new value
     ctrlport->set(knob_map);
