@@ -37,7 +37,7 @@
 #define FFT_SIZE     4000
 #define AUDIO_RATE  96000
 
-static long fft_delay_msec = 40;
+static long fft_delay_msec = 25;
 
 /*! \brief FFT thread function.
  *  \param rx The active instance of the receiver object.
@@ -167,7 +167,7 @@ receiver::receiver(const std::string name, const std::string input, const std::s
     // initialize SNR
     d_signal = -120.0;
     d_noise  = -120.0;
-    d_snr_alpha = 0.1;
+    d_snr_alpha = 0.15;
     d_snr_alpha_inv = 1.0 - d_snr_alpha;
     d_last_snr = 0.0;
 
@@ -726,6 +726,7 @@ void receiver::iqrec_enable(int enable)
         sprintf(buff, "sapphire_%dkHz_%dMsps_%s.raw", freq, rate, currentDateTime());
 
         iqrec->open(buff);
+        iqrec->set_unbuffered(true);
         iqrec->do_update();
     }
 
