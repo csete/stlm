@@ -144,7 +144,7 @@ void MainWindow::refresh(void)
 void MainWindow::statsReceived(float volt, float tx, float gnc, float aau)
 {
     ui->batLabel->setText(QString("%1 V").arg(volt, 4, 'f', 1));
-    ui->txLabel->setText(QString("%1 kbps").arg(tx, 4, 'f', 1));
+    ui->txDataLabel->setText(QString("%1 kbps").arg(tx, 4, 'f', 1));
     ui->gncLabel->setText(QString("%1 kbps").arg(gnc, 4, 'f', 1));
     ui->aauLabel->setText(QString("%1 kbps").arg(aau, 4, 'f', 1));
 }
