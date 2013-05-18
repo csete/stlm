@@ -151,13 +151,15 @@ void CStatisticsClient::scDataAvailable(void)
  * The umber in front of <P>,<B> indicates the source address. For the
  * Sapphire mission in 2013 we use:
  *      (0x00: NULL packet)
- *      0x00: TX0 TLM (prototype)
- *      0x01: TX1 TLM
- *      0x02: TX2 TLM
+ *      0x00: TX1 TLM
+ *      0x01: TX2 TLM
+ *      0x02: TX1 TLM high power
+ *      0x03: TX2 TLM high power
  *      0x11: TX1 / GNC
  *      0x12: TX1 / AAU
  *      0x13: TX2 / GNC
  *      0x14: TX2 / AAU
+ * (currently 0x13 and 0x14 are not used)
  *
  * The fields are separated with tab character and the TX status (from TX to flags)
  * is one field. The TX statrus field is always returned even if we have never received
@@ -214,12 +216,15 @@ void CStatisticsClient::scParseData(const QString data)
             case 0x00:
             case 0x01:
             case 0x02:
-                // stats for TX 0..2
+            case 0x03:
+                // stats for TX 0..3
                 if (tlm_tx_id == addr)
                 {
                     if (Q_LIKELY(prev_tx_bytes > 0.0f))
                     {
                         tlm_tx_data = 8.e-3f * (bytes - prev_tx_bytes);
+                        if (tlm_tx_data < 0.f)
+                            tlm_tx_data = 0.f;
                     }
                     prev_tx_bytes = bytes;
                 }
@@ -232,6 +237,8 @@ void CStatisticsClient::scParseData(const QString data)
                     if (Q_LIKELY(prev_gnc_bytes > 0.0f))
                     {
                         tlm_gnc_data = 8.e-3f * (bytes - prev_gnc_bytes);
+                        if (tlm_gnc_data < 0.f)
+                            tlm_gnc_data = 0.f;
                     }
                     prev_gnc_bytes = bytes;
                 }
@@ -244,6 +251,8 @@ void CStatisticsClient::scParseData(const QString data)
                     if (Q_LIKELY(prev_aau_bytes > 0.0f))
                     {
                         tlm_aau_data = 8.e-3f * (bytes - prev_aau_bytes);
+                        if (tlm_aau_data < 0.f)
+                            tlm_aau_data = 0.f;
                     }
                     prev_aau_bytes = bytes;
                 }
