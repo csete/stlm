@@ -123,7 +123,7 @@ void CStatisticsClient::scSendByte(void)
     if (!connected)
         return;
 
-    qDebug() << __func__ << ":" << socket->write("x");;
+    socket->write("x");;
 }
 
 /*! Data is available from correlator. */
@@ -227,7 +227,7 @@ void CStatisticsClient::scParseData(const QString data)
 
             case 0x11:
                 // GNC via TX1
-                if (tlm_tx_id == 0)
+                // FIXME if (tlm_tx_id == 0)
                 {
                     if (Q_LIKELY(prev_gnc_bytes > 0.0f))
                     {
@@ -239,7 +239,7 @@ void CStatisticsClient::scParseData(const QString data)
 
             case 0x12:
                 // AAU via TX1
-                if (tlm_tx_id == 0)
+                // FIXME if (tlm_tx_id == 0)
                 {
                     if (Q_LIKELY(prev_aau_bytes > 0.0f))
                     {
@@ -248,10 +248,10 @@ void CStatisticsClient::scParseData(const QString data)
                     prev_aau_bytes = bytes;
                 }
                 break;
-
+#if 0
             case 0x13:
                 // GNC via TX2
-                if (tlm_tx_id == 1)
+                // FIXME  if (tlm_tx_id == 1)
                 {
                     if (Q_LIKELY(prev_gnc_bytes > 0.0f))
                     {
@@ -263,7 +263,7 @@ void CStatisticsClient::scParseData(const QString data)
 
             case 0x14:
                 // AAU via TX2
-                if (tlm_tx_id == 1)
+                // FIXME  if (tlm_tx_id == 1)
                 {
                     if (Q_LIKELY(prev_aau_bytes > 0.0f))
                     {
@@ -272,7 +272,7 @@ void CStatisticsClient::scParseData(const QString data)
                     prev_aau_bytes = bytes;
                 }
                 break;
-
+#endif
             default:
                 break;
             }
