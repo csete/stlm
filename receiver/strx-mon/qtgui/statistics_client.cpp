@@ -34,11 +34,11 @@ CStatisticsClient::CStatisticsClient(QString _host, quint16 _port, QObject *pare
     running = false;
 
     // intiailise stats variables
-    last_uptime = 0.f;
-    last_volt   = 0.f;
-    last_tx     = 0.f;
-    last_gnc    = 0.f;
-    last_aau    = 0.f;
+    tlm_tx_uptime = 0.f;
+    tlm_tx_volt   = 0.f;
+    tlm_tx_data   = 0.f;
+    tlm_gnc_data  = 0.f;
+    tlm_aau_data  = 0.f;
 
     // create socket and establish connection
     socket = new QTcpSocket(parent);
@@ -132,7 +132,7 @@ void CStatisticsClient::scDataAvailable(void)
 
     scParseData(data_str);
 
-    emit scTlmReceived(last_volt, last_tx, last_gnc, last_aau);
+    emit scTlmReceived(tlm_tx_volt, tlm_tx_data, tlm_gnc_data, tlm_aau_data);
 }
 
 
@@ -183,9 +183,10 @@ void CStatisticsClient::scParseData(const QString data)
         if (list.size() == 4)
         {
             // TX ID is in list[0]
-            last_uptime = list[1].toFloat();
-            last_volt   = list[2].toFloat();
+            tlm_tx_uptime = list[1].toFloat();
+            tlm_tx_volt   = list[2].toFloat();
             // TX flags is in list[3]
         }
+        // else do nothing; keep last data
     }
 }

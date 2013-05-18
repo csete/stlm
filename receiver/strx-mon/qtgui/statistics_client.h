@@ -70,11 +70,12 @@ private:
     bool        running;
 
     // latest statistics
-    float       last_uptime;
-    float       last_volt;
-    float       last_tx;
-    float       last_gnc;
-    float       last_aau;
+    int         tlm_tx_id;     // Transmitter ID
+    float       tlm_tx_uptime; // Transmitter uptime
+    float       tlm_tx_volt;   // Transmitter supply voltage
+    float       tlm_tx_data;   // Data rate of TX TLM
+    float       tlm_gnc_data;  // Data rate of GNC TLM
+    float       tlm_aau_data;  // Data rate of AAU TLM
 
     // private methods
     void scParseData(const QString data);
