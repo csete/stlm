@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui network
 
 TARGET = qtgui
 TEMPLATE = app
@@ -12,11 +12,13 @@ TEMPLATE = app
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
-    plotter.cpp
+    plotter.cpp \
+    statistics_client.cpp
 
 HEADERS  += \
     mainwindow.h \
-    plotter.h
+    plotter.h \
+    statistics_client.h
 
 FORMS    += \
     mainwindow.ui

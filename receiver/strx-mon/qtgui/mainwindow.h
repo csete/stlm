@@ -24,6 +24,7 @@
 #include <QTimer>
 
 #include "../common/gnuradio.h"
+#include "statistics_client.h"
 
 namespace Ui {
 class MainWindow;
@@ -49,6 +50,8 @@ private:
 
     QTimer *dataTimer;  /*!< Timer used to fetch data from remote receiver. */
     int     cb_counter; /*!< Callback counter. */
+
+    CStatisticsClient *stats;
 
     void makeParamList(void);
 

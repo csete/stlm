@@ -51,7 +51,11 @@ MainWindow::MainWindow(Ice::ObjectPrx ice_prx, QWidget *parent) :
     ctrlport = GNURadio::ControlPortPrx::checkedCast(ice_prx);
     makeParamList();
 
-    // setup data refreshimer
+    // start statistics client
+    stats = new CStatisticsClient("192.168.1.107", 5000, parent);
+    stats->scStart();
+
+    // setup data refresh timer
     cb_counter = 0;
     dataTimer = new QTimer(this);
     connect(dataTimer, SIGNAL(timeout()), this, SLOT(refresh()));
@@ -60,8 +64,12 @@ MainWindow::MainWindow(Ice::ObjectPrx ice_prx, QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    stats->scStop();
+    delete stats;
+
     dataTimer->stop();
     delete dataTimer;
+
     delete ui;
 }
 
