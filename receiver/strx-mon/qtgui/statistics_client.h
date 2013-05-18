@@ -52,7 +52,7 @@ public:
     void scStop(void);
 
 signals:
-    void scTlmReceived(float volt, float tx, float gnc, float aau);
+    void scTlmReceived(unsigned int txid, float volt, float tx, float gnc, float aau);
 
 private slots:
     void scConnected(void);

@@ -34,6 +34,7 @@ CStatisticsClient::CStatisticsClient(QString _host, quint16 _port, QObject *pare
     running = false;
 
     // intiailise stats variables
+    tlm_tx_id      = 50;
     tlm_tx_uptime  = 0.f;
     tlm_tx_volt    = 0.f;
     tlm_tx_data    = 0.f;
@@ -135,7 +136,7 @@ void CStatisticsClient::scDataAvailable(void)
 
     scParseData(data_str);
 
-    emit scTlmReceived(tlm_tx_volt, tlm_tx_data, tlm_gnc_data, tlm_aau_data);
+    emit scTlmReceived(tlm_tx_id, tlm_tx_volt, tlm_tx_data, tlm_gnc_data, tlm_aau_data);
 }
 
 
@@ -185,7 +186,7 @@ void CStatisticsClient::scParseData(const QString data)
         list << regexp.cap(1);  // return match by first (and only) expression
         pos += regexp.matchedLength();
     }
-    if (list.size() == 4)
+    if (list.size() >= 3) // flags are printed in HEX and we can't parse those (yet)
     {
         tlm_tx_id     = list[0].toInt();
         tlm_tx_uptime = list[1].toFloat();

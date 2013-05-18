@@ -57,7 +57,7 @@ private:
 
 private slots:
     void refresh(void);
-    void statsReceived(float volt, float tx, float gnc, float aau);
+    void statsReceived(unsigned int id, float volt, float tx, float gnc, float aau);
     void on_plotter_newDemodFreq(qint64 freq, qint64 delta);
     void on_plotter_newFilterFreq(int low, int high);
     void on_recButton_toggled(bool checked);

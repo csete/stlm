@@ -53,8 +53,8 @@ MainWindow::MainWindow(Ice::ObjectPrx ice_prx, QWidget *parent) :
 
     // start statistics client
     stats = new CStatisticsClient("192.168.1.107", 5000, parent);
-    connect(stats, SIGNAL(scTlmReceived(float,float,float,float)),
-            this, SLOT(statsReceived(float,float,float,float)));
+    connect(stats, SIGNAL(scTlmReceived(unsigned int,float,float,float,float)),
+            this, SLOT(statsReceived(unsigned int,float,float,float,float)));
     stats->scStart();
 
     // setup data refresh timer
@@ -141,8 +141,13 @@ void MainWindow::refresh(void)
 }
 
 /*! New TX statistics have been received. */
-void MainWindow::statsReceived(float volt, float tx, float gnc, float aau)
+void MainWindow::statsReceived(unsigned int id, float volt, float tx, float gnc, float aau)
 {
+    if (id < 10)
+        ui->txLabel->setText(QString("TX%1").arg(id));
+    else
+        ui->txLabel->setText("TX?");
+
     ui->batLabel->setText(QString("%1 V").arg(volt, 4, 'f', 1));
     ui->txDataLabel->setText(QString("%1 kbps").arg(tx, 4, 'f', 1));
     ui->gncLabel->setText(QString("%1 kbps").arg(gnc, 4, 'f', 1));
