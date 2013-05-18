@@ -69,13 +69,17 @@ private:
     bool        connected;
     bool        running;
 
-    // latest statistics
-    int         tlm_tx_id;     // Transmitter ID
+    // statistics
+    unsigned int tlm_tx_id;     // Transmitter ID
     float       tlm_tx_uptime; // Transmitter uptime
     float       tlm_tx_volt;   // Transmitter supply voltage
     float       tlm_tx_data;   // Data rate of TX TLM
     float       tlm_gnc_data;  // Data rate of GNC TLM
     float       tlm_aau_data;  // Data rate of AAU TLM
+
+    float       prev_tx_bytes;
+    float       prev_gnc_bytes;
+    float       prev_aau_bytes;
 
     // private methods
     void scParseData(const QString data);

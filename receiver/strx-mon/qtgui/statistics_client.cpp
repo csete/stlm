@@ -34,11 +34,14 @@ CStatisticsClient::CStatisticsClient(QString _host, quint16 _port, QObject *pare
     running = false;
 
     // intiailise stats variables
-    tlm_tx_uptime = 0.f;
-    tlm_tx_volt   = 0.f;
-    tlm_tx_data   = 0.f;
-    tlm_gnc_data  = 0.f;
-    tlm_aau_data  = 0.f;
+    tlm_tx_uptime  = 0.f;
+    tlm_tx_volt    = 0.f;
+    tlm_tx_data    = 0.f;
+    tlm_gnc_data   = 0.f;
+    tlm_aau_data   = 0.f;
+    prev_tx_bytes  = 0.f;
+    prev_gnc_bytes = 0.f;
+    prev_aau_bytes = 0.f;
 
     // create socket and establish connection
     socket = new QTcpSocket(parent);
@@ -146,13 +149,14 @@ void CStatisticsClient::scDataAvailable(void)
  *   <B> : Decoded bytes
  * The umber in front of <P>,<B> indicates the source address. For the
  * Sapphire mission in 2013 we use:
- *      0x00: NULL packet
+ *      (0x00: NULL packet)
+ *      0x00: TX0 TLM (prototype)
  *      0x01: TX1 TLM
  *      0x02: TX2 TLM
- *      0x11: TX1 / AAU
- *      0x12: TX1 / GNC
- *      0x13: TX2 / AAU
- *      0x14: TX2 / GNC
+ *      0x11: TX1 / GNC
+ *      0x12: TX1 / AAU
+ *      0x13: TX2 / GNC
+ *      0x14: TX2 / AAU
  *
  * The fields are separated with tab character and the TX status (from TX to flags)
  * is one field. The TX statrus field is always returned even if we have never received
@@ -160,33 +164,118 @@ void CStatisticsClient::scDataAvailable(void)
  */
 void CStatisticsClient::scParseData(const QString data)
 {
-    QString tx_status_str;
+    QString status_str;
     QRegExp regexp;
     QStringList data_list = data.split('\t',QString::SkipEmptyParts, Qt::CaseSensitive);
+    QStringList list;
 
     int n = data_list.size();
 
-    // First field is TX status and should always be returned by correlator
-    if (n > 0)
-    {
-        QStringList list;
-        int pos = 0;
-        tx_status_str = data_list[0];
+    if (n <= 0)
+        return;
 
-        // extract the numbers
-        regexp.setPattern("([-+]?[0-9]*\\.?[0-9]+)");  // must enclose expr in () otherwise rx.cap won't work
-        while ((pos = regexp.indexIn(tx_status_str, pos)) != -1)
+    // First field is TX status and should always be returned by correlator
+    int pos = 0;
+    status_str = data_list[0];
+
+    // extract the numbers
+    regexp.setPattern("([-+]?[0-9]*\\.?[0-9]+)");  // must enclose expr in () otherwise rx.cap won't work
+    while ((pos = regexp.indexIn(status_str, pos)) != -1)
+    {
+        list << regexp.cap(1);  // return match by first (and only) expression
+        pos += regexp.matchedLength();
+    }
+    if (list.size() == 4)
+    {
+        tlm_tx_id     = list[0].toInt();
+        tlm_tx_uptime = list[1].toFloat();
+        tlm_tx_volt   = list[2].toFloat();
+        // TX flags is in list[3]
+    }
+
+    // return if there are no more fields to process
+    if (n == 1)
+        return;
+
+    // process data rate statistics. Field pattern is   i:M,N
+    for (int i = 1; i < n; i++)
+    {
+        status_str = data_list[i];
+        regexp.setPattern("(\\d+)\\:(\\d+)\\,(\\d+)");
+        if (regexp.indexIn(status_str) != -1)
         {
-            list << regexp.cap(1);  // return match by first (and only) expression
-            pos += regexp.matchedLength();
+            unsigned int addr = regexp.cap(1).toUInt();
+            //float packets     = regexp.cap(2).toFloat();
+            float bytes       = regexp.cap(3).toFloat();
+
+            switch (addr)
+            {
+            case 0x00:
+            case 0x01:
+            case 0x02:
+                // stats for TX 0..2
+                if (tlm_tx_id == addr)
+                {
+                    if (Q_LIKELY(prev_tx_bytes > 0.0f))
+                    {
+                        tlm_tx_data = 8.e-3f * (bytes - prev_tx_bytes);
+                    }
+                    prev_tx_bytes = bytes;
+                }
+                break;
+
+            case 0x11:
+                // GNC via TX1
+                if (tlm_tx_id == 0)
+                {
+                    if (Q_LIKELY(prev_gnc_bytes > 0.0f))
+                    {
+                        tlm_gnc_data = 8.e-3f * (bytes - prev_gnc_bytes);
+                    }
+                    prev_gnc_bytes = bytes;
+                }
+                break;
+
+            case 0x12:
+                // AAU via TX1
+                if (tlm_tx_id == 0)
+                {
+                    if (Q_LIKELY(prev_aau_bytes > 0.0f))
+                    {
+                        tlm_aau_data = 8.e-3f * (bytes - prev_aau_bytes);
+                    }
+                    prev_aau_bytes = bytes;
+                }
+                break;
+
+            case 0x13:
+                // GNC via TX2
+                if (tlm_tx_id == 1)
+                {
+                    if (Q_LIKELY(prev_gnc_bytes > 0.0f))
+                    {
+                        tlm_gnc_data = 8.e-3f * (bytes - prev_gnc_bytes);
+                    }
+                    prev_gnc_bytes = bytes;
+                }
+                break;
+
+            case 0x14:
+                // AAU via TX2
+                if (tlm_tx_id == 1)
+                {
+                    if (Q_LIKELY(prev_aau_bytes > 0.0f))
+                    {
+                        tlm_aau_data = 8.e-3f * (bytes - prev_aau_bytes);
+                    }
+                    prev_aau_bytes = bytes;
+                }
+                break;
+
+            default:
+                break;
+            }
+
         }
-        if (list.size() == 4)
-        {
-            // TX ID is in list[0]
-            tlm_tx_uptime = list[1].toFloat();
-            tlm_tx_volt   = list[2].toFloat();
-            // TX flags is in list[3]
-        }
-        // else do nothing; keep last data
     }
 }
