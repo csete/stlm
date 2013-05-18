@@ -16,6 +16,7 @@
  * the Free Software Foundation, Inc., 51 Franklin Street,
  * Boston, MA 02110-1301, USA.
  */
+#include <QByteArray>
 #include <QDebug>
 #include <QIODevice>
 
@@ -32,10 +33,11 @@ CStatisticsClient::CStatisticsClient(QString _host, quint16 _port, QObject *pare
     // create socket and establish connection
     socket = new QTcpSocket(parent);
     connect(socket, SIGNAL(connected()), this, SLOT(scConnected()));
+    connect(socket, SIGNAL(readyRead()), this, SLOT(scDataAvailable()));
     socket->connectToHost(host, port, QIODevice::ReadWrite);
 
     stat_timer = new QTimer(this);
-    connect(stat_timer, SIGNAL(timeout()), this, SLOT(scRunStats()));
+    connect(stat_timer, SIGNAL(timeout()), this, SLOT(scSendByte()));
 }
 
 
@@ -95,10 +97,26 @@ void CStatisticsClient::scDisconnected(void)
     }
 }
 
-void CStatisticsClient::scRunStats(void)
+/*! Send one byte to correlator.
+ *
+ * Sending a random byte to the correlator will trigger a respons
+ * with the latest statistics. Reading the data happens in scDataAvilable().
+ *
+ * \sa scDataAvailable
+ */
+void CStatisticsClient::scSendByte(void)
 {
     if (!connected)
         return;
 
-    qDebug() << __func__;
+    qDebug() << __func__ << ":" << socket->write("x");;
+}
+
+/*! Data is available from correlator. */
+void CStatisticsClient::scDataAvailable(void)
+{
+    QByteArray data = socket->readAll();
+    QString data_str = QString(data);
+
+    qDebug() << __func__ << ":" << data_str;
 }

@@ -57,7 +57,8 @@ signals:
 private slots:
     void scConnected(void);
     void scDisconnected(void);
-    void scRunStats(void);
+    void scSendByte(void);
+    void scDataAvailable(void);
 
 private:
     QString     host;
