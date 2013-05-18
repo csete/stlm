@@ -68,6 +68,16 @@ private:
 
     bool        connected;
     bool        running;
+
+    // latest statistics
+    float       last_uptime;
+    float       last_volt;
+    float       last_tx;
+    float       last_gnc;
+    float       last_aau;
+
+    // private methods
+    void scParseData(const QString data);
 };
 
 #endif // STATISTICS_CLIENT_H

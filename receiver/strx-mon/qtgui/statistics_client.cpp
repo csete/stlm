@@ -19,6 +19,9 @@
 #include <QByteArray>
 #include <QDebug>
 #include <QIODevice>
+#include <QRegExp>
+#include <QString>
+#include <QStringList>
 
 #include "statistics_client.h"
 
@@ -29,6 +32,13 @@ CStatisticsClient::CStatisticsClient(QString _host, quint16 _port, QObject *pare
     port = _port;
     connected = false;
     running = false;
+
+    // intiailise stats variables
+    last_uptime = 0.f;
+    last_volt   = 0.f;
+    last_tx     = 0.f;
+    last_gnc    = 0.f;
+    last_aau    = 0.f;
 
     // create socket and establish connection
     socket = new QTcpSocket(parent);
@@ -119,4 +129,62 @@ void CStatisticsClient::scDataAvailable(void)
     QString data_str = QString(data);
 
     qDebug() << __func__ << ":" << data_str;
+
+    scParseData(data_str);
+
+    emit scTlmReceived(last_volt, last_tx, last_gnc, last_aau);
+}
+
+
+/*! Parse string received from correlator.
+ *
+ * The string received from the correlator has the form:
+ *
+ * TX: 0  Uptime: 98.4  Vbat: 8.43  Flags: 8000  0:<P>,<B>  1:<P>,<B>  ...
+ *
+ *   <P> : Decoded packets
+ *   <B> : Decoded bytes
+ * The umber in front of <P>,<B> indicates the source address. For the
+ * Sapphire mission in 2013 we use:
+ *      0x00: NULL packet
+ *      0x01: TX1 TLM
+ *      0x02: TX2 TLM
+ *      0x11: TX1 / AAU
+ *      0x12: TX1 / GNC
+ *      0x13: TX2 / AAU
+ *      0x14: TX2 / GNC
+ *
+ * The fields are separated with tab character and the TX status (from TX to flags)
+ * is one field. The TX statrus field is always returned even if we have never received
+ * anything.
+ */
+void CStatisticsClient::scParseData(const QString data)
+{
+    QString tx_status_str;
+    QRegExp regexp;
+    QStringList data_list = data.split('\t',QString::SkipEmptyParts, Qt::CaseSensitive);
+
+    int n = data_list.size();
+
+    // First field is TX status and should always be returned by correlator
+    if (n > 0)
+    {
+        QStringList list;
+        int pos = 0;
+        tx_status_str = data_list[0];
+
+        // extract the numbers
+        regexp.setPattern("(\\d+)");
+        while ((pos = regexp.indexIn(tx_status_str, pos)) != -1)
+        {
+            list << regexp.cap(1);
+            pos += regexp.matchedLength();
+        }
+
+        if (list.size() == 4)
+        {
+            last_uptime = list[1].toFloat();
+            last_volt   = list[2].toFloat();
+        }
+    }
 }
