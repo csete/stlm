@@ -53,6 +53,8 @@ MainWindow::MainWindow(Ice::ObjectPrx ice_prx, QWidget *parent) :
 
     // start statistics client
     stats = new CStatisticsClient("192.168.1.107", 5000, parent);
+    connect(stats, SIGNAL(scTlmReceived(float,float,float,float)),
+            this, SLOT(statsReceived(float,float,float,float)));
     stats->scStart();
 
     // setup data refresh timer
@@ -136,6 +138,12 @@ void MainWindow::refresh(void)
         ui->plotter->setCenterFreq((qint64)knob_d->value);
     }
 
+}
+
+/*! New TX statistics have been received. */
+void MainWindow::statsReceived(float volt, float tx, float gnc, float aau)
+{
+    ui->batLabel->setText(QString("%1 V").arg(volt, 4, 'f', 1));
 }
 
 /*! New filter cutoff. */

@@ -174,17 +174,18 @@ void CStatisticsClient::scParseData(const QString data)
         tx_status_str = data_list[0];
 
         // extract the numbers
-        regexp.setPattern("(\\d+)");
+        regexp.setPattern("([-+]?[0-9]*\\.?[0-9]+)");  // must enclose expr in () otherwise rx.cap won't work
         while ((pos = regexp.indexIn(tx_status_str, pos)) != -1)
         {
-            list << regexp.cap(1);
+            list << regexp.cap(1);  // return match by first (and only) expression
             pos += regexp.matchedLength();
         }
-
         if (list.size() == 4)
         {
+            // TX ID is in list[0]
             last_uptime = list[1].toFloat();
             last_volt   = list[2].toFloat();
+            // TX flags is in list[3]
         }
     }
 }
