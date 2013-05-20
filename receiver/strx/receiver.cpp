@@ -719,7 +719,7 @@ void receiver::iqrec_enable(int enable)
     if (enable)
     {
         // start new recording
-        int freq = (int)(rf_freq() / 1.e3);   // frequency in kHz
+        int freq = (int)(rx_freq() / 1.e3);   // frequency in kHz
         int rate = (int)(d_quad_rate / 1.e6); // sample rate in Msps
         char buff[80];
 
