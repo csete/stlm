@@ -72,14 +72,16 @@ namespace strx {
             usrp_src->set_center_freq(freq);
             d_freq = usrp_src->get_center_freq();
         }
+        else
+        {
+            d_freq = freq;
+        }
+        
     }
 
     double source_c_impl::get_freq(void)
     {
-        if (input_type == INPUT_TYPE_UHD)
-            return usrp_src->get_center_freq();
-        else
-            return 0.0;
+        return d_freq;
     }
 
     void source_c_impl::get_freq_range(double *start, double *stop, double *step)
