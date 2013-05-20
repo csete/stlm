@@ -665,7 +665,7 @@ double receiver::snr_to_freq(double snr)
 {
 #define F_MIN   200.0
 #define F_MAX   800.0
-#define SLOPE (F_MAX-F_MIN)/(SNR_MAX-SNR_MIN)
+#define F_SLOPE (F_MAX-F_MIN)/(SNR_MAX-SNR_MIN)
 
     double freq_out;
 
@@ -674,7 +674,7 @@ double receiver::snr_to_freq(double snr)
     else if (snr < SNR_MIN)
         snr = SNR_MIN;
 
-    freq_out = F_MIN + SLOPE * (snr-SNR_MIN);
+    freq_out = F_MIN + F_SLOPE * (snr-SNR_MIN);
 
     return freq_out;
 }
@@ -684,7 +684,7 @@ double receiver::snr_to_ampl(double snr)
 {
 #define DB_MIN  -30.0
 #define DB_MAX  -2.0
-#define SLOPE (DB_MAX-DB_MIN)/(SNR_MAX-SNR_MIN)
+#define DB_SLOPE (DB_MAX-DB_MIN)/(SNR_MAX-SNR_MIN)
 
     double ampl_db;
     double ampl_out = 0.5;
@@ -694,7 +694,7 @@ double receiver::snr_to_ampl(double snr)
     else if (snr < SNR_MIN)
         snr = SNR_MIN;
 
-    ampl_db = DB_MIN + SLOPE * (snr-SNR_MIN);  // dB below 1.0
+    ampl_db = DB_MIN + DB_SLOPE * (snr-SNR_MIN);  // dB below 1.0
     ampl_out = pow(10.0, ampl_db / 20.0);      // linear gain
 
     return ampl_out;
