@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>676</width>
-    <height>347</height>
+    <width>750</width>
+    <height>350</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -261,14 +261,17 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QPushButton" name="chanButton">
-        <property name="toolTip">
-         <string>Swap active channel</string>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
-        <property name="text">
-         <string>CHAN</string>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
         </property>
-       </widget>
+       </spacer>
       </item>
       <item>
        <widget class="QPushButton" name="recButton">
@@ -280,6 +283,16 @@
         </property>
         <property name="checkable">
          <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="chanButton">
+        <property name="toolTip">
+         <string>Swap active channel</string>
+        </property>
+        <property name="text">
+         <string>CHAN</string>
         </property>
        </widget>
       </item>
@@ -305,7 +318,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>676</width>
+     <width>750</width>
      <height>25</height>
     </rect>
    </property>
