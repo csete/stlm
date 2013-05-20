@@ -162,7 +162,7 @@ private:
 
     // Channel filter stuff
     double d_cutoff;             /*!< Channel filter cutoff (1/2 BW). */
-    double d_ch_offs[MAX_CHAN];  /*!< Channel offsets from center (Hz). */
+    double d_ch_offs[MAX_CHAN+1];  /*!< Channel offsets from center (Hz). */
     int    d_ch;                  /*!< Active channel. */
 
     // FFT stuff
