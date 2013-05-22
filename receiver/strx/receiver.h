@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /*
- * Copyright 2013 Alexandru Csete, OZ9AEC
+ * Copyright (c) 2013 Alexandru Csete, OZ9AEC
  *
  * Strx is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
