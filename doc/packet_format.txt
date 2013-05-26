@@ -1,0 +1,38 @@
+== Packet Format ==
+
+(image)
+
+The Sapphire telemetry system uses a very simple packet format with the following structure:
+
+* Fixed length packet header (11 bytes)
+* Variable length data field (up to 255 bytes)
+* CRC for the data field (2 bytes)
+* FEC field that applies to parts of the header, the data field and the CRC
+
+
+=== Header field ===
+
+(image)
+
+The packet header contains the following fields:
+
+# A 4 byte PREAMBLE field consisting of alternating 0 and 1. The preamble is used for training the clock recovery in the receiver.
+# A 4 byte SYNC field containing 0x374FE2DA. The SYNC field is used by the correlator in the receiver to identify a packet.
+# A 1 byte LENGTH field specifying the number of bytes in the data field.
+# Another 1 byte length field but this time the "inverse" (255-LENGTH).
+# A one byte SOURCE field telling where the packet comes from. This information is used in mission control to route the packets to the right user. Currently the following talues are valid:
+#* 0x00: TX1
+#* 0x01: TX2
+#* 0x11: AAU
+#* 0x12: GNC
+
+
+=== Data field ===
+
+
+
+=== CRC field ===
+
+
+=== FEC field ===
+

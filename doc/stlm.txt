@@ -6,3 +6,5 @@
 include::intro.txt[]
 
 include::glossary.txt[]
+
+include::packet_format[]
