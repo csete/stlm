@@ -50,11 +50,12 @@ To be written.
 To be written.
 
 [[section-bitrate]]
-=== Bitrate budget ===
+=== Downlink budget ===
 
-In the present configuration we have 250 kbps at our disposal. We apply rate 1/2 FEC to te data, thus we have 125 kbps at our disposal. The table below shows the downlink budget under these circumstances.
+In the present configuration we have 250 kbps at our disposal. We apply rate 1/2 FEC to the data, thus we have 125 kbps at our disposal. xref:table-budget[] below shows the downlink budget under these circumstances. As can be seen from the table, almost half of the traffic is transmitter telemetry to fill out empty slots, thus there is plenty of room for future increase in data rate.
 
-.Sapphire downlink budget
+[[table-budget]]
+.Bitrate budget
 [format="csv",width="60%",cols="6"]
 [frame="topbot",grid="none",options="header,footer"]
 |======
