@@ -1,0 +1,8 @@
+= The Sapphire Telemetry System =
+:Author: Author One, Author Two
+:Date: June 2013
+:Revision: 1.1
+
+include::intro.txt[]
+
+include::glossary.txt[]

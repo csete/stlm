@@ -1,8 +1,3 @@
-= The Sapphire Telemetry System =
-authors
-v1.0, May 2013: First draft.
-v1.1, June 2013: First complete issue.
-
 == Overview ==
 
 The Sapphire Telemetry System is a telemetry downlink system for the Sapphire test rocket by Copenhagen Suborbitals. Its purpose is to support downlink of high rate telemetry from the GNC and AAU units allowing detailed analysis of the flight.
@@ -11,7 +6,7 @@ The telemetry system is based on a design origninally created for the Romit 2 cu
 
 - Two downlink channels working simultaneously.
 - Works in the 13 cm amateur / ISM band.
-- 1 watt RF output per channel
+- 1 watt RF output per channel (adjustable in firmware)
 - Up to 2 Mbps bitrate per channel (including all headers, FEC, etc.)
 - FSK modulation (GFSK?)
 - Rate 1/2 FEC
@@ -20,11 +15,16 @@ The telemetry system is based on a design origninally created for the Romit 2 cu
 
 The telemetry system consists of the following components:
 
-Transmitter::  The transmitter is based on the ADF7242 transceiver chip running in raw mode. The digital data interface to the payload goes through a PIC24, which is responsible for converting the potentially variable rate data to fixed rate. The transmitter is described in details in section TBD.
+Transmitter::  The transmitter is based on the ADF7242 transceiver chip running in raw mode. The digital data interface to the payload goes through a PIC24, which is responsible for converting the potentially variable rate data to fixed rate. The transmitter is described in details in [yellow-background]#section TBD#.
 
-Receiver:: The receiver is a software defined radio using USRP hardware and GNU Radio based software receiver. It runs on a Linux PC and delivers the telemetry data via Ethernet or RS232 interface. The receiver is set up to run autonomously and does not require any user intervention; however, key parameters are exported via a controlport interface. This allows remote clients to connect to the receiver, monitor the system performance, and modify some key parameters. The receiver is described in details in section TBD.
+Receiver:: The receiver is a software defined radio using USRP hardware and GNU Radio based software receiver. It runs on a Linux PC and delivers the telemetry data via Ethernet or RS232 interface. The receiver is set up to run autonomously and does not require any user intervention; however, key parameters are exported via a controlport interface. This allows remote clients to connect to the receiver, monitor the system performance, and modify some key parameters. The receiver is described in details in [yellow-background]#section TBD#.
 
-Control panel:: The monitoring and control panel is a client that connects to the receiver and displays system performance (spectrum, SNR, data and error rates, etc.) to mission control crew. It also allows modifying some basic settings in the receiver chain such as frequencies, active channels, recording on/off, etc. The control panel is described in more details together with the receiver in section TBD.
+Control panel:: The monitoring and control panel is a client that connects to the receiver and displays system performance (spectrum, SNR, data and error rates, etc.) to mission control crew. It also allows modifying some basic settings in the receiver chain such as frequencies, active channels, recording on/off, etc. The control panel is described in more details together with the receiver in [yellow-background]#section TBD#.
 
-Tracking tower:: An AZ/EL mount built specifically for tracking fast flying objects. It can carry many antennas of different shapes and sizes as long as the construction stays balanced. For the Sapphire mission it carries two 2.4 GHz yagi antennas, one vertically and horizontally polarized. Each antenna is connected to a receiver that receives both downlink channels; however, only one channel of the horizontal receiver is monitored in real time. The other channels are recorded for reference.
+Tracking tower:: An AZ/EL mount built specifically for tracking fast flying objects. It can carry many antennas of different shapes and sizes as long as the construction stays balanced. For the Sapphire mission it carries two 2.4 GHz yagi antennas, one vertically and horizontally polarized. Each antenna is connected to a receiver that receives both downlink channels; however, only one channel of the horizontal receiver is monitored in real time. The other channels are recorded for reference. The tracking tower has been described in [yellow-background]#TBD#.
 
+In addition to the unit documentation listed above, following system level documentation exists:
+
+Packet format:: Describes the packet format used by the telemetry system.
+
+Forward error correction:: Describes the error correction code used by the system.

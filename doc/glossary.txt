@@ -1,6 +1,13 @@
+== #Glossary# ==
+
 [horizontal]
 *AAU*:: ?
+*AZ*:: Azimuth
+*EL*:: Elevation
+*FEC*:: Forward error correction
+*FSK*:: Frequency shift keying
 *GNC*:: Guidance, navigation and control
+*ISM*:: Unlicensed frequency bands used by industrial, scientific and medical devices
+*RF*:: Radio frequency
 *SNR*:: Signal to noise ratio
 *USRP*:: Universal Software Radio Peripheral
-
