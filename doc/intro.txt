@@ -25,6 +25,6 @@ Tracking tower:: An AZ/EL mount built specifically for tracking fast flying obje
 
 In addition to the unit documentation listed above, following system level documentation exists:
 
-Packet format:: Describes the packet format used by the telemetry system.
+Packet format:: Describes the packet format used by the telemetry system. See xref:chapter-format[]
 
 Forward error correction:: Describes the error correction code used by the system.

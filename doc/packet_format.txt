@@ -1,38 +1,66 @@
-== Packet Format ==
+[[chapter-format]]
+== Telemetry format and budget ==
 
-(image)
+The Sapphire telemetry is a continuous stream of packetized data. The data comes from the GNC and AAU units and packed into the frame structure described here. When neither GNC nor AAU are transmitting data, the tranmitter will fill out the empty slots using own telemetry. This will ensure that the receiver can stay locked and synchronized to the signal even when there is no telemetry from the payload.
 
-The Sapphire telemetry system uses a very simple packet format with the following structure:
+The Sapphire telemetry system uses a very simple packet format shown on the figure below:
 
-* Fixed length packet header (11 bytes)
+image::images/packet_structure.png[Sapphire telemetry packet structure]
+
+A packet consists of the followinf parts:
+
+* A fixed length packet header (11 bytes)
 * Variable length data field (up to 255 bytes)
 * CRC for the data field (2 bytes)
-* FEC field that applies to parts of the header, the data field and the CRC
+* FEC field that applies to parts of the header (last 5 bytes), the data field and the CRC
 
+=== Packet header ===
 
-=== Header field ===
-
-(image)
+image::images/packet_header.png[Sapphire telemetry packet header]
 
 The packet header contains the following fields:
 
-# A 4 byte PREAMBLE field consisting of alternating 0 and 1. The preamble is used for training the clock recovery in the receiver.
-# A 4 byte SYNC field containing 0x374FE2DA. The SYNC field is used by the correlator in the receiver to identify a packet.
-# A 1 byte LENGTH field specifying the number of bytes in the data field.
-# Another 1 byte length field but this time the "inverse" (255-LENGTH).
-# A one byte SOURCE field telling where the packet comes from. This information is used in mission control to route the packets to the right user. Currently the following talues are valid:
-#* 0x00: TX1
-#* 0x01: TX2
-#* 0x11: AAU
-#* 0x12: GNC
+1. A 4 byte PREAMBLE field consisting of alternating 0 and 1. The preamble is used for training the clock recovery in the receiver.
+2. A 4 byte SYNC field containing the pattern 0x374FE2DA. The SYNC field is used by the correlator in the receiver to identify a packet.
+3. A 1 byte LENGTH field specifying the number of bytes in the data field.
+4. Another 1 byte length field but this time the "inverse" (255-LENGTH).
+5. A one byte SOURCE field specifying the origin of the packet. This information is used by the data distribution system in mission control to route the packets to their respective users. Following values are valid:
+** 0x00: TX1
+** 0x01: TX2
+** 0x11: AAU
+** 0x12: GNC
 
 
 === Data field ===
 
+image::images/packet_data_field.png[Sapphire telemetry data field]
 
+The data field contains the data as received from the payload. There are two types of payload data as indicated on the figure above. They are terminated with carriage return and linefeed characters 0x0D0A indicating packet end. The transmitter interprets this as a "flush the buffer" command even if 0x0D0A occurs inside the data. In practice this may lead to fragmentation of payload packets; however, this is not expected to cause any problems at the receiving end.
+
+A third type of packet contains telemetry from the transmitter itself. These packets are used to fill out empty slots that are not used by the payload. See xref:section-bitrate[] for details.
+
+The transmitter packets contain the transmitter uptime in 1/10th of a second and two raw ADC readings corresponding to the supply voltage and the temperature inside the PIC24.
 
 === CRC field ===
 
+To be written.
 
 === FEC field ===
 
+To be written.
+
+[[section-bitrate]]
+=== Bitrate budget ===
+
+In the present configuration we have 250 kbps at our disposal. We apply rate 1/2 FEC to te data, thus we have 125 kbps at our disposal. The table below shows the downlink budget under these circumstances.
+
+.Sapphire downlink budget
+[format="csv",width="60%",cols="6"]
+[frame="topbot",grid="none",options="header,footer"]
+|======
+Source, Packet size [bytes/pkt], Packet overhead [bytes/pkt], Packet length [bits/pkt], Packet rate [pkt/sec], Bitrate [bps]
+GNC, 80, 14, 752, 102.25, 76789.62
+AAU, 48, 14, 496, 20.00, 9920.00
+TX,  10, 14, 192, 198.00, 38016.00
+Total, , , , , 125.83 k
+|======

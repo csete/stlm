@@ -1,10 +1,10 @@
 = The Sapphire Telemetry System =
-:Author: Author One, Author Two
+:Author: Alexandru Csete, Peter Scott
 :Date: June 2013
 :Revision: 1.1
 
 include::intro.txt[]
 
-include::glossary.txt[]
+include::packet_format.txt[]
 
-include::packet_format[]
+include::glossary.txt[]
