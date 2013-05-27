@@ -5,6 +5,7 @@ The Sapphire telemetry is a continuous stream of packetized data. The data comes
 
 The Sapphire telemetry system uses a very simple packet format shown on the figure below:
 
+.The Sapphire packet structure
 image::images/packet_structure.png[Sapphire telemetry packet structure]
 
 A packet consists of the followinf parts:
@@ -16,6 +17,7 @@ A packet consists of the followinf parts:
 
 === Packet header ===
 
+.Sapphire telemetry packet header
 image::images/packet_header.png[Sapphire telemetry packet header]
 
 The packet header contains the following fields:
@@ -33,6 +35,7 @@ The packet header contains the following fields:
 
 === Data field ===
 
+.Sapphire telemetry data field
 image::images/packet_data_field.png[Sapphire telemetry data field]
 
 The data field contains the data as received from the payload. There are two types of payload data as indicated on the figure above. They are terminated with carriage return and linefeed characters 0x0D0A indicating packet end. The transmitter interprets this as a "flush the buffer" command even if 0x0D0A occurs inside the data. In practice this may lead to fragmentation of payload packets; however, this is not expected to cause any problems at the receiving end.
@@ -47,7 +50,10 @@ To be written.
 
 === FEC field ===
 
-To be written.
+.FEC frame
+image::images/packet_fec.png[Sapphire telemetry FEC frame"]
+
+FEC is applied to all fields except the PREAMBLE and SYNC fields in the header. A FEC frame is thus 5 + N bytes long, where N is the length of the data field.
 
 [[section-bitrate]]
 === Downlink budget ===
@@ -56,7 +62,7 @@ In the present configuration we have 250 kbps at our disposal. We apply rate 1/2
 
 [[table-budget]]
 .Bitrate budget
-[format="csv",width="60%",cols="6"]
+[format="csv",width="80%",cols="6"]
 [frame="topbot",grid="none",options="header,footer"]
 |======
 Source, Packet size [bytes/pkt], Packet overhead [bytes/pkt], Packet length [bits/pkt], Packet rate [pkt/sec], Bitrate [bps]
