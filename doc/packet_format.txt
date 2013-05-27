@@ -1,12 +1,12 @@
 [[chapter-format]]
-== Telemetry format and budget ==
+== Packet format and bitrate budget ==
 
 The Sapphire telemetry is a continuous stream of packetized data. The data comes from the GNC and AAU units and packed into the frame structure described here. When neither GNC nor AAU are transmitting data, the tranmitter will fill out the empty slots using own telemetry. This will ensure that the receiver can stay locked and synchronized to the signal even when there is no telemetry from the payload.
 
 The Sapphire telemetry system uses a very simple packet format shown on the figure below:
 
 .The Sapphire packet structure
-image::images/packet_structure.png[Sapphire telemetry packet structure]
+image::images/packet_structure.png["Sapphire telemetry packet structure", width=800]
 
 A packet consists of the followinf parts:
 
@@ -18,7 +18,7 @@ A packet consists of the followinf parts:
 === Packet header ===
 
 .Sapphire telemetry packet header
-image::images/packet_header.png[Sapphire telemetry packet header]
+image::images/packet_header.png["Sapphire telemetry packet header", width=800]
 
 The packet header contains the following fields:
 
@@ -36,7 +36,7 @@ The packet header contains the following fields:
 === Data field ===
 
 .Sapphire telemetry data field
-image::images/packet_data_field.png[Sapphire telemetry data field]
+image::images/packet_data_field.png["Sapphire telemetry data field", width=800]
 
 The data field contains the data as received from the payload. There are two types of payload data as indicated on the figure above. They are terminated with carriage return and linefeed characters 0x0D0A indicating packet end. The transmitter interprets this as a "flush the buffer" command even if 0x0D0A occurs inside the data. In practice this may lead to fragmentation of payload packets; however, this is not expected to cause any problems at the receiving end.
 
@@ -46,12 +46,12 @@ The transmitter packets contain the transmitter uptime in 1/10th of a second and
 
 === CRC field ===
 
-To be written.
+_To be written_
 
 === FEC field ===
 
 .FEC frame
-image::images/packet_fec.png[Sapphire telemetry FEC frame"]
+image::images/packet_fec.png["Sapphire telemetry FEC frame", width=800]
 
 FEC is applied to all fields except the PREAMBLE and SYNC fields in the header. A FEC frame is thus 5 + N bytes long, where N is the length of the data field.
 

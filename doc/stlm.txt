@@ -5,6 +5,12 @@
 
 include::intro.txt[]
 
+include::transmitter.txt[]
+
+include::receiver.txt[]
+
 include::packet_format.txt[]
+
+include::fec.txt[]
 
 include::glossary.txt[]
