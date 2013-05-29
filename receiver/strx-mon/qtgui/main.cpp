@@ -28,14 +28,23 @@
 
 int main(int argc, char *argv[])
 {
+    QString host;
+    QString port;
 	QString conn;
     Ice::CommunicatorPtr ice_com;
     Ice::ObjectPrx       ice_prx;
 
 	if (argc == 3)
-		conn = QString("gnuradio:tcp -h %1 -p %2").arg(argv[1]).arg(argv[2]);
+    {
+        host = QString(argv[1]);
+        port = QString(argv[2]);
+    }
 	else
-		conn = QString("gnuradio:tcp -h localhost -p 43243");
+    {
+        host = QString("localhost");
+        port = QString("43243");
+    }
+    conn = QString("gnuradio:tcp -h %1 -p %2").arg(host).arg(port);
 
     try
     {
@@ -50,7 +59,7 @@ int main(int argc, char *argv[])
     }
 
     QApplication a(argc, argv);
-    MainWindow w(ice_prx);
+    MainWindow w(ice_prx, host);
     w.show();
     
     return a.exec();

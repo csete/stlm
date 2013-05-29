@@ -26,7 +26,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-MainWindow::MainWindow(Ice::ObjectPrx ice_prx, QWidget *parent) :
+MainWindow::MainWindow(Ice::ObjectPrx ice_prx, QString host, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
@@ -52,7 +52,7 @@ MainWindow::MainWindow(Ice::ObjectPrx ice_prx, QWidget *parent) :
     makeParamList();
 
     // start statistics client
-    stats = new CStatisticsClient("192.168.1.107", 5000, parent);
+    stats = new CStatisticsClient(host, 5000, parent);
     connect(stats, SIGNAL(scTlmReceived(unsigned int,float,float,float,float)),
             this, SLOT(statsReceived(unsigned int,float,float,float,float)));
     stats->scStart();

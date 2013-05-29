@@ -21,6 +21,7 @@
 
 #include <Ice/Ice.h>
 #include <QMainWindow>
+#include <QString>
 #include <QTimer>
 
 #include "../common/gnuradio.h"
@@ -35,7 +36,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
     
 public:
-    explicit MainWindow(Ice::ObjectPrx ice_prx, QWidget *parent = 0);
+    explicit MainWindow(Ice::ObjectPrx ice_prx, QString host, QWidget *parent = 0);
     ~MainWindow();
     
 private:
