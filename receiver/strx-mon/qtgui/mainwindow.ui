@@ -261,19 +261,6 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <spacer name="horizontalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
        <widget class="QPushButton" name="recButton">
         <property name="toolTip">
          <string>Record I/Q data</string>
@@ -308,6 +295,54 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item>
+       <widget class="QLabel" name="gainLabel">
+        <property name="text">
+         <string>RF:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="gainSpin">
+        <property name="suffix">
+         <string> dB</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="fftLabel">
+        <property name="text">
+         <string>FFT:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="fftCombo">
+        <property name="currentIndex">
+         <number>2</number>
+        </property>
+        <item>
+         <property name="text">
+          <string>25 fps</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>10 fps</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>5 fps</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>1 fps</string>
+         </property>
+        </item>
+       </widget>
       </item>
      </layout>
     </item>

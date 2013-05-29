@@ -54,6 +54,7 @@ private:
     CStatisticsClient *stats;
 
     void makeParamList(void);
+    int  fftRate();
 
 private slots:
     void refresh(void);
@@ -62,6 +63,7 @@ private slots:
     void on_plotter_newFilterFreq(int low, int high);
     void on_recButton_toggled(bool checked);
     void on_chanButton_clicked(void);
+    void on_fftCombo_currentIndexChanged(int index);
 };
 
 #endif // MAINWINDOW_H

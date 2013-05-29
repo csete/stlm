@@ -61,7 +61,7 @@ MainWindow::MainWindow(Ice::ObjectPrx ice_prx, QWidget *parent) :
     cb_counter = 0;
     dataTimer = new QTimer(this);
     connect(dataTimer, SIGNAL(timeout()), this, SLOT(refresh()));
-    dataTimer->start(100);
+    dataTimer->start(200);
 }
 
 MainWindow::~MainWindow()
@@ -242,4 +242,42 @@ void MainWindow::on_chanButton_clicked(void)
 
     // trigger an update in thenext cycle
     cb_counter = 0;
+}
+
+/*! \brief FFT rate has changed.
+ *  \param index Index of the newly selected item in the combo box (unused)
+ */
+void MainWindow::on_fftCombo_currentIndexChanged(int index)
+{
+    Q_UNUSED(index);
+
+    // Get new frame rate (return 0 if error)
+    int fps = fftRate();
+
+    if (fps)
+    {
+        // restart timer
+        dataTimer->start(1000/fps);
+    }
+}
+
+/*! \brief Get current FFT rate setting.
+ *  \return The current FFT rate in frames per second (always non-zero)
+ */
+int MainWindow::fftRate()
+{
+    bool ok;
+    int fps;
+    QString strval = ui->fftCombo->currentText();
+
+    strval.remove(" fps");
+    fps = strval.toInt(&ok, 10);
+
+    if (!ok)
+        qDebug() << __func__ <<": Could not convert" <<
+                    strval << "to number.";
+    else
+        qDebug() << "New FFT rate:" << fps << "Hz";
+
+    return fps;
 }
