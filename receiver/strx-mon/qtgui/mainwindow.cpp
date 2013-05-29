@@ -89,12 +89,15 @@ void MainWindow::makeParamList(void)
     id_list_read.push_back("strx::frequency");
     id_list_read.push_back("strx::offset");
     id_list_read.push_back("strx::cutoff");
+    id_list_read.push_back("strx_source_c0::gain");
 
     id_list_filt.push_back("strx::offset");
     id_list_filt.push_back("strx::cutoff");
 
     id_list_ctl.push_back("strx::iqrec");
     id_list_ctl.push_back("strx::channel");
+
+    id_list_rf.push_back("strx_source_c0::gain");
 }
 
 void MainWindow::refresh(void)
@@ -136,6 +139,10 @@ void MainWindow::refresh(void)
         knob = knob_map["strx::frequency"];
         knob_d = (GNURadio::KnobDPtr)(knob);
         ui->plotter->setCenterFreq((qint64)knob_d->value);
+
+        knob = knob_map["strx_source_c0::gain"];
+        knob_d = (GNURadio::KnobDPtr)(knob);
+        ui->gainSpin->setValue((int)knob_d->value);
     }
 
 }
@@ -240,9 +247,31 @@ void MainWindow::on_chanButton_clicked(void)
     // send new value
     ctrlport->set(knob_map);
 
-    // trigger an update in thenext cycle
+    // trigger an update in the next cycle
     cb_counter = 0;
 }
+
+/*! \brief RF gain has changed. */
+void MainWindow::on_gainSpin_valueChanged(int gain)
+{
+    GNURadio::KnobMap  knob_map; // map<string, GNURadio::KnobPtr>
+    GNURadio::KnobPtr  knob;
+    GNURadio::KnobDPtr knob_d;
+
+    knob_map = ctrlport->get(id_list_rf);
+    knob = knob_map["strx_source_c0::gain"];
+    knob_d = (GNURadio::KnobDPtr)(knob);
+
+    int rfg = (int) knob_d->value;
+
+    if (rfg != gain)
+    {
+        // send new value
+        knob_d->value = gain;
+        ctrlport->set(knob_map);
+    }
+}
+
 
 /*! \brief FFT rate has changed.
  *  \param index Index of the newly selected item in the combo box (unused)
