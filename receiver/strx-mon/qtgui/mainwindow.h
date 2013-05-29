@@ -22,6 +22,7 @@
 #include <Ice/Ice.h>
 #include <QMainWindow>
 #include <QString>
+#include <QTime>
 #include <QTimer>
 
 #include "../common/gnuradio.h"
@@ -50,6 +51,7 @@ private:
     GNURadio::KnobIDList     id_list_ctl;  // Various control parameters
     GNURadio::KnobIDList     id_list_rf;   // RF control parameters
 
+    QTime  *statTimer;  /*!< Delay timer used when fetching statistics. */
     QTimer *dataTimer;  /*!< Timer used to fetch data from remote receiver. */
     int     cb_counter; /*!< Callback counter. */
 

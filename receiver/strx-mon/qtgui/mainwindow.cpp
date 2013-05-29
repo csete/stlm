@@ -58,10 +58,12 @@ MainWindow::MainWindow(Ice::ObjectPrx ice_prx, QString host, QWidget *parent) :
     stats->scStart();
 
     // setup data refresh timer
-    cb_counter = 0;
+    statTimer = new QTime();
     dataTimer = new QTimer(this);
     connect(dataTimer, SIGNAL(timeout()), this, SLOT(refresh()));
+
     dataTimer->start(200);
+    statTimer->start();
 }
 
 MainWindow::~MainWindow()
@@ -71,6 +73,8 @@ MainWindow::~MainWindow()
 
     dataTimer->stop();
     delete dataTimer;
+
+    delete statTimer;
 
     delete ui;
 }
@@ -123,8 +127,10 @@ void MainWindow::refresh(void)
     ui->snrLabel->setText(QString("%1 dB").arg(knob_d->value, 4, 'f', 1));
 
     // update frequencies and filters parameters at 1Hz
-    if (!(cb_counter % 1))
+    if (statTimer->elapsed() > 1000)
     {
+        statTimer->restart();
+
         knob_map = ctrlport->get(id_list_read);
 
         knob = knob_map["strx::offset"];
