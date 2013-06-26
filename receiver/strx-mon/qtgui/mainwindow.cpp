@@ -32,8 +32,8 @@ MainWindow::MainWindow(Ice::ObjectPrx ice_prx, QString host, QWidget *parent) :
 {
     // setup UI
     ui->setupUi(this);
-    ui->mainToolBar->setVisible(false);
-    ui->plotter->setPercent2DScreen(100);
+    //ui->mainToolBar->setVisible(false);
+    ui->plotter->setPercent2DScreen(40);
     ui->plotter->setCenterFreq(2330e6);
     ui->plotter->setFftCenterFreq(2330e6);
     ui->plotter->setSampleRate(4.e6);
