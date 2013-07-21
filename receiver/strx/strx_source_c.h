@@ -21,7 +21,7 @@
 #ifndef INCLUDED_STRX_SOURCE_C_H
 #define INCLUDED_STRX_SOURCE_C_H
 
-#include <gr_hier_block2.h>
+#include <gnuradio/hier_block2.h>
 #include "strx_api.h"
 
 
@@ -33,7 +33,7 @@ namespace strx {
      * This block provides an input source for the Sapphire telemetry reciever.
      * The input source can be either a USRP saource or a file source with a throttle.
      */
-    class STRX_API source_c : virtual public gr_hier_block2
+    class STRX_API source_c : virtual public gr::hier_block2
     {
     public:
 

@@ -17,7 +17,7 @@
  * the Free Software Foundation, Inc., 51 Franklin Street,
  * Boston, MA 02110-1301, USA.
  */
-#include <gr_io_signature.h>
+#include <gnuradio/io_signature.h>
 #include "strx_fft_impl.h"
 
 namespace strx {
@@ -28,9 +28,9 @@ namespace strx {
     }
 
     fft_c_impl::fft_c_impl(int fftsize, int wintype)
-      : gr_sync_block("strx_fft_c",
-                      gr_make_io_signature(1, 1, sizeof (gr_complex)),
-                      gr_make_io_signature(0, 0, 0)),
+      : gr::sync_block("strx_fft_c",
+                       gr::io_signature::make(1, 1, sizeof (gr_complex)),
+                       gr::io_signature::make(0, 0, 0)),
         d_fftsize(fftsize),
         d_wintype(-1)
     {

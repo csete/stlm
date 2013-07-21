@@ -29,21 +29,21 @@
 #include <boost/thread/shared_mutex.hpp>
 
 // GNU Radio includes
-#include <analog/quadrature_demod_cf.h>
-#include <analog/sig_source_f.h>
-#include <analog/sig_source_waveform.h>
-#include <audio/sink.h>
-#include <blocks/file_sink.h>
-#include <blocks/sub_ff.h>
-#include <config.h>
-#include <digital/clock_recovery_mm_ff.h>
-#include <filter/freq_xlating_fir_filter_ccf.h>
-#include <filter/firdes.h>
-#include <filter/single_pole_iir_filter_ff.h>
-#include <gr_complex.h>
-#include <gr_top_block.h>
+#include <gnuradio/analog/quadrature_demod_cf.h>
+#include <gnuradio/analog/sig_source_f.h>
+#include <gnuradio/analog/sig_source_waveform.h>
+#include <gnuradio/audio/sink.h>
+#include <gnuradio/blocks/file_sink.h>
+#include <gnuradio/blocks/sub_ff.h>
+#include <gnuradio/config.h>
+#include <gnuradio/digital/clock_recovery_mm_ff.h>
+#include <gnuradio/filter/freq_xlating_fir_filter_ccf.h>
+#include <gnuradio/filter/firdes.h>
+#include <gnuradio/filter/single_pole_iir_filter_ff.h>
+#include <gnuradio/gr_complex.h>
+#include <gnuradio/top_block.h>
 #ifdef GR_CTRLPORT
-#include <rpcregisterhelpers.h>
+#include <gnuradio/rpcregisterhelpers.h>
 #endif
 
 // strx includes
@@ -136,7 +136,7 @@ private:
     
     input_type_e input_type;
 
-    gr_top_block_sptr tb;  /*!< Receiver top block. */
+    gr::top_block_sptr tb;  /*!< Receiver top block. */
     
     strx::source_c::sptr                       src;    /*!< Input source. */
     strx::fft_c::sptr                          fft;    /*!< Receiver FFT block. */

@@ -22,10 +22,10 @@
 
 #include <boost/thread/mutex.hpp>
 #include <boost/circular_buffer.hpp>
-#include <config.h>
-#include <fft/fft.h>
-#include <filter/firdes.h>
-#include <gr_complex.h>
+#include <gnuradio/config.h>
+#include <gnuradio/fft/fft.h>
+#include <gnuradio/filter/firdes.h>
+#include <gnuradio/gr_complex.h>
 
 #include "strx_fft.h"
 

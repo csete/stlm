@@ -20,10 +20,10 @@
 #ifndef INCLUDED_STRX_SOURCE_C_IMPL_H
 #define INCLUDED_STRX_SOURCE_C_IMPL_H
 
-#include <config.h>
-#include <blocks/file_source.h>
-#include <blocks/throttle.h>
-#include <uhd/usrp_source.h>
+#include <gnuradio/config.h>
+#include <gnuradio/blocks/file_source.h>
+#include <gnuradio/blocks/throttle.h>
+#include <gnuradio/uhd/usrp_source.h>
 
 #include "strx_source_c.h"
 

@@ -20,10 +20,10 @@
 
 #include "strx_source_c_impl.h"
 
-#include <config.h>
+#include <gnuradio/config.h>
 #include <gnuradio/attributes.h>
-#include <gr_io_signature.h>
-#include <rpcregisterhelpers.h>
+#include <gnuradio/io_signature.h>
+#include <gnuradio/rpcregisterhelpers.h>
 
 
 namespace strx {
@@ -34,9 +34,9 @@ namespace strx {
     }
 
     source_c_impl::source_c_impl(const std::string input, double quad_rate)
-      : gr_hier_block2("strx_source_c",
-                       gr_make_io_signature(0, 0, sizeof (gr_complex)),
-                       gr_make_io_signature(1, 1, sizeof (gr_complex))),
+      : gr::hier_block2("strx_source_c",
+                        gr::io_signature::make(0, 0, sizeof (gr_complex)),
+                        gr::io_signature::make(1, 1, sizeof (gr_complex))),
         d_quad_rate(quad_rate),
         d_freq(0.0),
         d_gain(0.0)

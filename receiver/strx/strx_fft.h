@@ -22,9 +22,9 @@
 
 #include <boost/circular_buffer.hpp>
 #include <boost/thread/mutex.hpp>
-#include <filter/firdes.h>       /* contains enum win_type */
-#include <gr_complex.h>
-#include <gr_sync_block.h>
+#include <gnuradio/filter/firdes.h>       /* contains enum win_type */
+#include <gnuradio/gr_complex.h>
+#include <gnuradio/sync_block.h>
 
 #include "strx_api.h"
 
@@ -44,7 +44,7 @@ namespace strx {
      *
      * \note Used qtgui_sink_c as starting point.
      */
-    class STRX_API fft_c : virtual public gr_sync_block
+    class STRX_API fft_c : virtual public gr::sync_block
     {
     public:
 

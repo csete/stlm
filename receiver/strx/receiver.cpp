@@ -110,11 +110,11 @@ receiver::receiver(const std::string name, const std::string input, const std::s
     d_lnb_lo = 0.0;
 
     // Initialize DSP blocks
-    tb = gr_make_top_block(d_name);
+    tb = gr::make_top_block(d_name);
 
     src = strx::source_c::make(input, d_quad_rate);
     fft = strx::fft_c::make(FFT_SIZE);
-    iqrec = blocks::file_sink::make(sizeof(gr_complex), "/tmp/strx.raw");
+    iqrec = gr::blocks::file_sink::make(sizeof(gr_complex), "/tmp/strx.raw");
     iqrec->set_unbuffered(true);
     iqrec->close();
     d_recording = 0;
@@ -124,8 +124,8 @@ receiver::receiver(const std::string name, const std::string input, const std::s
     d_ch_offs[1] = 1.0e6;
     d_ch = 0;
     d_cutoff = 400e3;
-    taps = filter::firdes::low_pass(1.0, d_quad_rate, d_cutoff, d_cutoff);
-    filter = filter::freq_xlating_fir_filter_ccf::make(2, taps, d_ch_offs[d_ch], d_quad_rate);
+    taps = gr::filter::firdes::low_pass(1.0, d_quad_rate, d_cutoff, d_cutoff);
+    filter = gr::filter::freq_xlating_fir_filter_ccf::make(2, taps, d_ch_offs[d_ch], d_quad_rate);
 
     // audio SSI
     if (audio_out == "none")
@@ -135,24 +135,24 @@ receiver::receiver(const std::string name, const std::string input, const std::s
     else
     {
         d_use_audio = true;
-        trk_sig = analog::sig_source_f::make(AUDIO_RATE, analog::GR_SIN_WAVE, 700, 0.5, 0);
-        trk_snd = audio::sink::make(AUDIO_RATE, audio_out, true);
+        trk_sig = gr::analog::sig_source_f::make(AUDIO_RATE, analog::GR_SIN_WAVE, 700, 0.5, 0);
+        trk_snd = gr::audio::sink::make(AUDIO_RATE, audio_out, true);
     }
 
     // other blocks
-    demod = analog::quadrature_demod_cf::make(1.f);
-    iir = filter::single_pole_iir_filter_ff::make(1.e-3);
-    sub = blocks::sub_ff::make();
-    clock_recov = digital::clock_recovery_mm_ff::make(8.f, 10.e-3f, 10.e-3f, 1.e-3f, 10.e-3f);
+    demod = gr::analog::quadrature_demod_cf::make(1.f);
+    iir = gr::filter::single_pole_iir_filter_ff::make(1.e-3);
+    sub = gr::blocks::sub_ff::make();
+    clock_recov = gr::digital::clock_recovery_mm_ff::make(8.f, 10.e-3f, 10.e-3f, 1.e-3f, 10.e-3f);
 
 
     if (output.empty())
     {
-        fifo = blocks::file_sink::make(sizeof(float), "/dev/fd/1");
+        fifo = gr::blocks::file_sink::make(sizeof(float), "/dev/fd/1");
     }
     else
     {
-        fifo = blocks::file_sink::make(sizeof(float), output.c_str());
+        fifo = gr::blocks::file_sink::make(sizeof(float), output.c_str());
     }
 
     // Initialize FFT
