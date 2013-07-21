@@ -1,7 +1,7 @@
 == #Glossary# ==
 
 [horizontal]
-*AAU*:: ?
+*AAU*:: Autonomous Abort Unit
 *AZ*:: Azimuth
 *EL*:: Elevation
 *FEC*:: Forward error correction
