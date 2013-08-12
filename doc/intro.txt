@@ -15,7 +15,7 @@ The telemetry system is based on a design origninally created for the Euroluna R
 - 1 watt RF output per channel (adjustable in firmware)
 - Up to 2 Mbps bitrate per channel (including all headers, FEC, etc.)
 - GFSK modulation
-- Rate 1/2 FEC
+- CRC and FEC (rate 1/2)
 
 [[figure-tlmsys]]
 .Telemetry system overview

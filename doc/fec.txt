@@ -2,3 +2,5 @@
 == Forward error correction ==
 
 _To be written_
+
+As writen in the Packet Format section, we use both CRC and rate 1/2 convolutional error correction code. While the convolutional code is used to correct bit errors in the received data, the CRC is used to verify that the received data is correct.
