@@ -46,14 +46,14 @@ The transmitter packets contain the transmitter uptime in 1/10th of a second and
 
 === CRC field ===
 
-_To be written_
+A 16-bit CRC is added to each packet in order to allow verifying correct packet reception. The CRC is generated using the programmable CRC generator in the PIC24 using the polynomial x^16^+x^12^+x^5^+1.
 
 === FEC field ===
 
 .FEC frame
 image::images/packet_fec.png["Sapphire telemetry FEC frame", width=800]
 
-FEC is applied to all fields except the PREAMBLE and SYNC fields in the header. A FEC frame is thus 5 + N bytes long, where N is the length of the data field.
+FEC is applied to all fields except the PREAMBLE and SYNC fields in the header. A FEC frame is thus 5 + N bytes long, where N is the length of the data field. Since we are using convolutional code we do not really have sepearate data and FEC fields as suggested by the figure. Instead, each byte is encoded as soon as it arrives and the coded data is put into th eoutput buffer.
 
 [[section-bitrate]]
 === Downlink budget ===
