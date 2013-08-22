@@ -1,4 +1,14 @@
 [[chapter-tx]]
 == Telemetry transmitter ==
 
-_To be written_
+The transmitter is based around the ADF7242 FSK transceiver chip by Analog Devices. The transceiver is used in raw FSK mode as opposed to any of the pre-programmed modes in the chip. Raw FSK mode allows up to 2 Mbps data rate.
+
+[[figure-tx]]
+.Functional diagram of the telemetry transmitter.
+image::images/transmitter.png["Functional overview of the transmitter", width=800, link="http://www.flickr.com/photos/csete/9571012889/"]
+
+The transmitter is connected to the GNC and AAU unit using a serial interface. This interface is provided by a PIC24 microcontroller which is in charge of all the data handling, including preparing the packets, calculating CRC and adding FEC. Moreover, the PIC24 is also responsible for configuring and controlling the ADF7242 transceiver chip.
+
+For the Sapphire mission we were using 500 kbps bit rate with rate 1/2 FEC, i.e. 250 kbps data throughput. The 250 kbps data includes packet headers and other bookkeeping data. See xref:chapter-format[] for details about the packet format.
+
+The ADF7242 transceiver chip is followed by a low pass filter, an ABA-54563 buffer amplifier and finally an ALM-31222 power amplifier capable of delivering 1W RF into the antenna.
