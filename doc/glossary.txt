@@ -3,6 +3,7 @@
 [horizontal]
 *AAU*:: Autonomous Abort Unit
 *AZ*:: Azimuth
+*CRC*:: Cyclic redundancy check
 *EL*:: Elevation
 *FEC*:: Forward error correction
 *FSK*:: Frequency shift keying
