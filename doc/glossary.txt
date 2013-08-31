@@ -2,6 +2,7 @@
 
 [horizontal]
 *AAU*:: Autonomous Abort Unit
+*ADC*:: Analog to digital converter
 *AZ*:: Azimuth
 *CRC*:: Cyclic redundancy check
 *EL*:: Elevation
@@ -10,5 +11,7 @@
 *GNC*:: Guidance, navigation and control
 *ISM*:: Unlicensed frequency bands used by industrial, scientific and medical devices
 *RF*:: Radio frequency
+*SDR*:: Software defined radio
+*SNN*:: Signal+noise to noise ratio
 *SNR*:: Signal to noise ratio
 *USRP*:: Universal Software Radio Peripheral
