@@ -1,3 +1,4 @@
+[[chapter-intro]]
 == Overview ==
 
 The Sapphire Telemetry System is a telemetry downlink system for the Sapphire test rocket by Copenhagen Suborbitals. Its purpose is to support downlink of high rate telemetry from the GNC and AAU units allowing detailed analysis of the flight.
@@ -8,12 +9,12 @@ xref:figure-infrastructure[] shows the telemetry downlink system in context of t
 .Sapphire data infrastructure
 image::images/sapphire_data_infrastructure.png["Sapphire data infrastructure", width=800]
 
-The telemetry system is based on a design origninally created for the Euroluna Romit 2 cubesat and  has the following characteristics:
+The telemetry system is based on a design originally created for the Euroluna Romit 2 cubesat and  has the following characteristics:
 
 - Two downlink channels working simultaneously.
 - Works in the 13 cm amateur / ISM band.
 - 1 watt RF output per channel (adjustable in firmware)
-- Up to 2 Mbps bitrate per channel (including all headers, FEC, etc.)
+- Up to 2 Mbps bit rate per channel (including all headers, FEC, etc.)
 - GFSK modulation
 - CRC and FEC (rate 1/2)
 
@@ -25,7 +26,7 @@ The telemetry system contains the following components:
 
 Transmitter::  The transmitter is based on the ADF7242 transceiver chip running in raw mode. The digital data interface to the payload goes through a PIC24, which is responsible for converting the potentially variable rate data to fixed rate. The transmitter is described in more details in xref:chapter-tx[].
 
-Receiver:: The receiver is a software defined radio using USRP hardware and GNU Radio based software receiver. It runs on a Linux PC and delivers the telemetry data via Ethernet or RS232 interface. The receiver is set up to run autonomously and does not require any user intervention; however, key parameters are exported via a controlport interface. This allows remote clients to connect to the receiver, monitor the system performance, and modify some key parameters. The receiver is described in details in xref:chapter-rx[].
+Receiver:: The receiver is a software defined radio using USRP hardware and GNU Radio based software receiver. It runs on a Linux PC and delivers the telemetry data via Ethernet or RS232 interface. The receiver is set up to run autonomously and does not require any user intervention; however, key parameters are exported via a control port interface. This allows remote clients to connect to the receiver, monitor the system performance, and modify some key parameters. The receiver is described in details in xref:chapter-rx[].
 
 Control panel:: The monitoring and control panel is a client that connects to the receiver and displays system performance (spectrum, SNR, data and error rates, etc.) to mission control crew. It also allows modifying some basic settings in the receiver chain such as frequency, active channel, recording on/off, etc. The control panel is described in more details together with the receiver in xref:chapter-rx[].
 
