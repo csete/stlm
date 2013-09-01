@@ -86,6 +86,10 @@ The above settings pretty much disables caching and are not recommended for dail
 
 ===== SNN & tracking =====
 
+The SNN block calculates the (S+N)/N ratio where S stand for signal power and N for noise power in dB. The SNN is converted to an audio tone by the wave generator block and is used as an audio aid for tracking. The higher the tone the stronger the signal.
+
+The SNN calculation is based on the FFT. Therefore, the SNN and wave generator blocks are scheduled by the same thread as the FFT processing outside of the GNU Radio main loop.
+
 ===== Frequency translating FIR filter =====
 
 The frequency translating FIR filter has three functions:
@@ -120,21 +124,40 @@ For the Sapphire mission we used alpha = 1e-3, corresponding to a time constant 
 
 ===== Clock recovery =====
 
-Our sample rate after the channel filter is reduced to 2 Msps. With a symbol rate of 250k this gives us 8 samples per symbol to work with. However, clock skew between the transmitter and the receiver may lead to this rate being different in practice, e.g. 7.998
-
-The clock recovery block helps us determine this clock skew and select the "best" sample to be sent to the decoder.
+Our sample rate after the channel filter is reduced to 2 Msps. With a symbol rate of 250k this gives us 8 samples per symbol to work with. However, clock skew between the transmitter and the receiver may lead to this rate being different in practice, e.g. 7.998 or 8.01. The clock recovery block helps us determine this clock skew and select the "best" sample to be sent to the decoder.
 
 The Mueller & Muller clock recovery algorithm requires only one sample per symbol and finds the correct timing by calculating an error term using the present and the previous symbol:
 
+e~n~ = (y'~n * y~n-1~) - (y~n~ * y'~n_1~)
 
+where y refers to the symbol (+1 or -1) and y' refers to the actual sample (any float).
+
+[[figure-mm]]
+.Mueller and Muller clock recovery
+image::images/mm_clock_recovery.png["Mueller & Muller clock recovery", width=800]
 
 The Mueller & Muller clock recovery algorithm is sensitive to carrier offsets which is why we perform the carrier recovery described in the previous section.
 
 ==== Command line interface ====
 
-bla bla....
+The software receiver is a command line application with the following command line options:
 
+----
+alc@atlantis:~/sdr/stlm.git/receiver/build$ ./strx -h
+linux; GNU C++ version 4.7.3; Boost_105300; UHD_003.005.003-140-gc099f2b5
 
+Sapphire telemetry receiver 0.3
+Command line options:
+  -h [ --help ]         This help message
+  -n [ --name ] arg     Receiver name (used for ctrlport)
+  -i [ --input ] arg    USRP sub device or I/Q file (use file:/path/to/file)
+  -a [ --ant ] arg      Select USRP antenna (e.g. RX2)
+  -f [ --freq ] arg     RF frequency in Hz or using G, M, k suffix
+  -g [ --gain ] arg     RF/IF gain in dB
+  -l [ --lnb ] arg      LNB LO frequency in Hz or using G, M, k suffix
+  -o [ --output ] arg   Output file (use stdout if omitted)
+  --audio arg (=none)   Audio output device (e.g. pulse, none)
+----
 
 === Data decoder ===
 
@@ -142,9 +165,11 @@ bla bla....
 .Data decoder
 image::images/data_decoder.png["Data decoder", width=600, link="http://www.flickr.com/photos/csete/9630060293/"]
 
-The data decoder runs as a separate process...
+The data decoder runs as a separate process
 
-Packet recovery consists of detecting the packet boundary, checking the packet length, the CRC, extracting the packet source and finally forwarding it to the respective user.
+First, the decoder looks for the sync bytes that each packet begins with c.f. xref:figure-packet-struct[] in xref:chapter-format[]. Once sync is obtained the decoder begins running the bytes through the Viterbi decoder. Recall that we are using convolutional FEC and all bytes in a FEC frame are encoded.
+
+The final step in the decoding process is the packet recovery, which consists of detecting the packet boundary, checking the packet length, the CRC, extracting the packet source and finally forwarding it to the respective user.
 
 === Monitoring and control ===
 
