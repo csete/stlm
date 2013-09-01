@@ -9,6 +9,8 @@ image::images/transmitter.png["Functional overview of the transmitter", width=80
 
 The transmitter is connected to the GNC and AAU unit using a serial interface. This interface is provided by a PIC24 microcontroller which is in charge of all the data handling, including preparing the packets, calculating CRC and adding FEC. Moreover, the PIC24 is also responsible for configuring and controlling the ADF7242 transceiver chip.
 
-For the Sapphire mission we were using 500 kbps bit rate with rate 1/2 FEC, i.e. 250 kbps data throughput. The 250 kbps data includes packet headers and other bookkeeping data. See xref:chapter-format[] for details about the packet format.
+For the Sapphire mission we were using 250 kbps bit rate with rate 1/2 FEC, i.e. 125 kbps data throughput. The 125 kbps data includes packet headers and other bookkeeping data. See xref:chapter-format[] for details about the packet format.
+
+The ADF7242 transmitter is running in GFSK mode. This eliminates the minimum shift restriction of FSK and reduces the occupied bandwidth (the transmitter uses 260 kHz shift in our case). On the other hand this also introduces inter-symbol interference that must be compensated for at the receiver end.
 
 The ADF7242 transceiver chip is followed by a low pass filter, an ABA-54563 buffer amplifier and finally an ALM-31222 power amplifier capable of delivering 1W RF into the antenna.
