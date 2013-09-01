@@ -5,6 +5,7 @@ The Sapphire telemetry is a continuous stream of packetized data. The data comes
 
 The Sapphire telemetry system uses a very simple packet format shown on the figure below:
 
+[[figure-packet-struct]]
 .The Sapphire packet structure
 image::images/packet_structure.png["Sapphire telemetry packet structure", width=800]
 
@@ -17,6 +18,7 @@ A packet consists of the followinf parts:
 
 === Packet header ===
 
+[[figure-packet-header]]
 .Sapphire telemetry packet header
 image::images/packet_header.png["Sapphire telemetry packet header", width=800]
 
