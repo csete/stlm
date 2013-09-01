@@ -16,12 +16,12 @@ It uses an MKU LNC 23 down-converter from Kuhne Electronic, a USRP1 equipped wit
 === MKU LNC 23 down-converter ===
 
 [[figure-lnc23]]
-.Kuhne MKU LNC 23 downconverter
-image::images/mku_lnc_23.png["Kuhne MKU LNC 23 downconverter", width=800, link="http://www.flickr.com/photos/csete/9630060225/"]
+.Kuhne MKU LNC 23 down-converter
+image::images/mku_lnc_23.png["Kuhne MKU LNC 23 down-converter", width=800, link="http://www.flickr.com/photos/csete/9630060225/"]
 
-The http://www.kuhne-electronic.de/en/products/down-converters/mku-lnc-23.html[MKU LNC 23] downconverter from http://www.kuhne-electronic.de/startseite.html[Kuhne Electronic] is mounted directly on the antenna and connected using a very short coaxial cable. This gives the primary receiver chain a low noise figure and provides sufficient gain to run a long coax cable down to the receiver, which is located below deck.
+The http://www.kuhne-electronic.de/en/products/down-converters/mku-lnc-23.html[MKU LNC 23] down-converter from http://www.kuhne-electronic.de/startseite.html[Kuhne Electronic] is mounted directly on the antenna and connected using a very short coaxial cable. This gives the primary receiver chain a low noise figure and provides sufficient gain to run a long coax cable down to the receiver, which is located below deck.
 
-The downconverter has built-in bias tee and is supplied through the coax. The supply voltage is injected into the coax using a bias tee at the USRP end below the deck.
+The down-converter has built-in bias tee and is supplied through the coax. The supply voltage is injected into the coax using a bias tee at the USRP end below the deck.
 
 === USRP with WBX front end ===
 
@@ -47,9 +47,9 @@ Schematics of the USRP1 and the WBX RF board are included in the https://github.
 .GNU Radio software receiver
 image::images/software_receiver.png["GNU Radio software receiver", width=800, link="http://www.flickr.com/photos/csete/9633295204/"]
 
-The software receiver is a C++ application built using the GNU Radio SDR framework. The receiver uses both DSP blocks and the runtime framework provided by GNU Radio. In addition to that, the telemetry receiver also takes advantage of the control port interfaces, which is one of the latest additions to GNU Radio.
+The software receiver is a C++ application built using the GNU Radio SDR framework. The receiver uses both DSP blocks and the run-time framework provided by GNU Radio. In addition to that, the telemetry receiver also takes advantage of the control port interfaces, which is one of the latest additions to GNU Radio.
 
-Most of the signal processing is executed by the GNU Radio scheduler and runs within that context. There are a few exceptions, namely the FFT block and the SNN calculations. These blocks are run in a separate boost thread scheduled periodically at 25-50 Hz. Since these are user interface related processings, there is no need to run them at higher rates.
+Most of the signal processing is executed by the GNU Radio scheduler and runs within that context. There are a few exceptions, namely the FFT block and the SNN calculations. These blocks are run in a separate boost thread scheduled periodically at 25-50 Hz. Since these are user interface related processing, there is no need to run them at higher rates.
 
 ==== Signal processing blocks ====
 
@@ -60,7 +60,7 @@ The UHD source block provides the interface to the USRP hardware. We chose to us
 ===== FFT =====
 
 This blocks performs complex FFT on the input spectrum. The FFT is performed in three stages:
-1. The first stage is a block in the GNU Radio flowgraph that stores the incoming samples in a circular buffer.
+1. The first stage is a block in the GNU Radio flow graph that stores the incoming samples in a circular buffer.
 2. The second stage fetches the last N samples from the circular buffer (N is the FFT size),  performs the FFT calculations and prepares the data for presentation (scales to dBFS and translates the spectrum). This function is executed periodically at 25-50 Hz outside of the GNU Radio scheduling.
 3. The third stage delivers the latest FFT data to external clients through the gnuradio-controlport interface.
 
@@ -68,7 +68,7 @@ This blocks performs complex FFT on the input spectrum. The FFT is performed in 
 
 This block is a simple file sink that dumps the complex I/Q samples to a file.
 
-We found that it is rather problematic to save I/Q files at high rate and perform real time signal processing at the same time on the same computer. When recording is enabled, the operating system will start caching until it runs out of available RAM. Once it's out of RAM it will start writing data to the disk periodically. The amount of data that needs to be written is huge and SDR processing is suspended during the write. Althogh the dropouts are very brief in duration, they are quite frequent and lead to loss of samples. Consequently, the correctly received packet rate dropped from 99% to 60%.
+We found that it is rather problematic to save I/Q files at high rate and perform real time signal processing at the same time on the same computer. When recording is enabled, the operating system will start caching until it runs out of available RAM. Once it's out of RAM it will start writing data to the disk periodically. The amount of data that needs to be written is huge and SDR processing is suspended during the write. Although the dropouts are very brief in duration, they are quite frequent and lead to loss of samples. Consequently, the correctly received packet rate dropped from 99% to 60%.
 
 There are several things one can do to improve the situation:
 
