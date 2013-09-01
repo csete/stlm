@@ -7,7 +7,7 @@ The Sapphire telemetry system uses a very simple packet format shown on the figu
 
 [[figure-packet-struct]]
 .The Sapphire packet structure
-image::images/packet_structure.png["Sapphire telemetry packet structure", width=800]
+image::images/packet_structure.png["Sapphire telemetry packet structure", scaledwidth="100%"]
 
 A packet consists of the following parts:
 
@@ -20,7 +20,7 @@ A packet consists of the following parts:
 
 [[figure-packet-header]]
 .Sapphire telemetry packet header
-image::images/packet_header.png["Sapphire telemetry packet header", width=800]
+image::images/packet_header.png["Sapphire telemetry packet header", scaledwidth="100%"]
 
 The packet header contains the following fields:
 
@@ -38,7 +38,7 @@ The packet header contains the following fields:
 === Data field ===
 
 .Sapphire telemetry data field
-image::images/packet_data_field.png["Sapphire telemetry data field", width=800]
+image::images/packet_data_field.png["Sapphire telemetry data field", scaledwidth="100%"]
 
 The data field contains the data as received from the payload. There are two types of payload data as indicated on the figure above. They are terminated with carriage return and linefeed characters 0x0D0A indicating packet end. The transmitter interprets this as a "flush the buffer" command even if 0x0D0A occurs inside the data. In practice this may lead to fragmentation of payload packets; however, this is not expected to cause any problems at the receiving end.
 
@@ -53,7 +53,7 @@ A 16-bit CRC is added to each packet in order to allow verifying correct packet 
 === FEC field ===
 
 .FEC frame
-image::images/packet_fec.png["Sapphire telemetry FEC frame", width=800]
+image::images/packet_fec.png["Sapphire telemetry FEC frame", scaledwidth="100%"]
 
 FEC is applied to all fields except the PREAMBLE and SYNC fields in the header. A FEC frame is thus 5 + N bytes long, where N is the length of the data field. Since we are using convolutional code we do not really have separate data and FEC fields as suggested by the figure. Instead, each byte is encoded as soon as it arrives and the coded data is put into the output buffer.
 

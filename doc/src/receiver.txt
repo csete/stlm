@@ -5,11 +5,11 @@ The Sapphire telemetry receiver is based on a Universal Software Radio Periphera
 
 As indicated on xref:figure-tlmsys[] in xref:chapter-intro[] we designed the system to use three receiver chains running parallel. One for receiving each telemetry channel using a USRP and a third one for testing and RTL-SDR receiver. Due to time constraints, we ended up using one USRP-based receiver for real time reception and one USRP-based receiver for recording the I/Q data to disk. The RTL-SDR experiment was not performed.
 
-Figure xref:figure-tlmrx[] below shows an overview of the receiver used for real time reception.
+xref:figure-tlmrx[] below shows an overview of the receiver used for real time reception.
 
 [[figure-tlmrx]]
 .Sapphire telemetry receiver
-image::images/telemetry_receiver.png["Sapphire telemetry receiver", width=800, link="http://www.flickr.com/photos/csete/9633295100/"]
+image::images/telemetry_receiver.png["Sapphire telemetry receiver", scaledwidth="100%", link="http://www.flickr.com/photos/csete/9633295100/"]
 
 It uses an MKU LNC 23 down-converter from Kuhne Electronic, a USRP1 equipped with a WBX transceiver daughter card and connected to a PC running software receiver and data decoder. Each of these components are described in the following sections.
 
@@ -17,7 +17,7 @@ It uses an MKU LNC 23 down-converter from Kuhne Electronic, a USRP1 equipped wit
 
 [[figure-lnc23]]
 .Kuhne MKU LNC 23 down-converter
-image::images/mku_lnc_23.png["Kuhne MKU LNC 23 down-converter", width=800, link="http://www.flickr.com/photos/csete/9630060225/"]
+image::images/mku_lnc_23.png["Kuhne MKU LNC 23 down-converter", scaledwidth="100%", link="http://www.flickr.com/photos/csete/9630060225/"]
 
 The http://www.kuhne-electronic.de/en/products/down-converters/mku-lnc-23.html[MKU LNC 23] down-converter from http://www.kuhne-electronic.de/startseite.html[Kuhne Electronic] is mounted directly on the antenna and connected using a very short coaxial cable. This gives the primary receiver chain a low noise figure and provides sufficient gain to run a long coax cable down to the receiver, which is located below deck.
 
@@ -27,7 +27,7 @@ The down-converter has built-in bias tee and is supplied through the coax. The s
 
 [[figure-wbx]]
 .WBX receiver
-image::images/wbx_rx.png["WBX receiver", width=800, link="http://www.flickr.com/photos/csete/9630059921/"]
+image::images/wbx_rx.png["WBX receiver", scaledwidth="100%", link="http://www.flickr.com/photos/csete/9630059921/"]
 
 The WBX transceiver board covers 50 MHz to 2.2 GHz and it has one of the best performing receivers for the USRPs. xref:figure-wbx[] shows a high level diagram of the receiver part.
 
@@ -35,7 +35,7 @@ The board has two amplifier stages (MGA62563 and MGA82563) followed by the ADL53
 
 [[figure-usrp]]
 .USRP1 receiver
-image::images/usrp1_rx.png["USRP1 receiver", width=500, link="http://www.flickr.com/photos/csete/9630059975/"]
+image::images/usrp1_rx.png["USRP1 receiver", scaledwidth="50%", link="http://www.flickr.com/photos/csete/9630059975/"]
 
 The ADC on the USRP1 runs at 64 MHz and could theoretically provide 64 MHz of bandwidth. However, since the USRP1 is connected to the host PC through USB2, the usable real-time bandwidth is limited to 8 MHz at 16 bit resolution. To that end, the ADC is followed by an FPGA running a digital down converter (DDC) providing a means to convert the 64 MHz to a lower rate. The USRP1 supports a wide variety of sample rates between 250 kHz and 8 MHz. For the Sapphire mission we have been using 4 MHz bandwidth allowing us to monitor both transmitters at the same time.
 
@@ -45,7 +45,7 @@ Schematics of the USRP1 and the WBX RF board are included in the https://github.
 
 [[figure-strx]]
 .GNU Radio software receiver
-image::images/software_receiver.png["GNU Radio software receiver", width=800, link="http://www.flickr.com/photos/csete/9633295204/"]
+image::images/software_receiver.png["GNU Radio software receiver", scaledwidth="100%", link="http://www.flickr.com/photos/csete/9633295204/"]
 
 The software receiver is a C++ application built using the GNU Radio SDR framework. The receiver uses both DSP blocks and the run-time framework provided by GNU Radio. In addition to that, the telemetry receiver also takes advantage of the control port interfaces, which is one of the latest additions to GNU Radio.
 
@@ -128,15 +128,15 @@ Our sample rate after the channel filter is reduced to 2 Msps. With a symbol rat
 
 The Mueller & Muller clock recovery algorithm requires only one sample per symbol and finds the correct timing by calculating an error term using the present and the previous symbol:
 
-e~n~ = (y'~n * y~n-1~) - (y~n~ * y'~n_1~)
+e~n~ = (y'~n~ * y~n-1~) - (y~n~ * y'~n-1~)
 
 where y refers to the symbol (+1 or -1) and y' refers to the actual sample (any float).
 
 [[figure-mm]]
-.Mueller and Muller clock recovery
-image::images/mm_clock_recovery.png["Mueller & Muller clock recovery", width=800]
+.Mueller & Muller clock recovery
+image::images/mm_clock_recovery.png["Mueller and Muller clock recovery", scaledwidth="70%"]
 
-The Mueller & Muller clock recovery algorithm is sensitive to carrier offsets which is why we perform the carrier recovery described in the previous section.
+The Mueller & Mullerr clock recovery algorithm is sensitive to carrier offsets which is why we perform the carrier recovery described in the previous section.
 
 ==== Command line interface ====
 
@@ -163,7 +163,7 @@ Command line options:
 
 [[figure-decoder]]
 .Data decoder
-image::images/data_decoder.png["Data decoder", width=600, link="http://www.flickr.com/photos/csete/9630060293/"]
+image::images/data_decoder.png["Data decoder", scaledwidth="75%", link="http://www.flickr.com/photos/csete/9630060293/"]
 
 The data decoder runs as a separate process
 
@@ -175,7 +175,7 @@ The final step in the decoding process is the packet recovery, which consists of
 
 [[figure-monitor]]
 .Sapphire telemetry monitor
-image::images/telemetry_monitor.jpg["Sapphire telemetry monitor", width=800, link="http://www.flickr.com/photos/csete/9407872286/"]
+image::images/telemetry_monitor.jpg["Sapphire telemetry monitor", scaledwidth="100%", link="http://www.flickr.com/photos/csete/9407872286/"]
 
 Monitoring and control of the receiver is carried out using the Sapphire telemetry monitor. It is a simple Qt-based application called strx-mon, which connects to the receiver and the data decoder using network sockets.
 

@@ -5,7 +5,7 @@ The transmitter is based around the ADF7242 FSK transceiver chip by Analog Devic
 
 [[figure-tx]]
 .Functional diagram of the telemetry transmitter.
-image::images/transmitter.png["Functional overview of the transmitter", width=800, link="http://www.flickr.com/photos/csete/9571012889/"]
+image::images/transmitter.png["Functional overview of the transmitter", scaledwidth="100%", link="http://www.flickr.com/photos/csete/9571012889/"]
 
 The transmitter is connected to the GNC and AAU unit using a serial interface. This interface is provided by a PIC24 microcontroller which is in charge of all the data handling, including preparing the packets, calculating CRC and adding FEC. Moreover, the PIC24 is also responsible for configuring and controlling the ADF7242 transceiver chip.
 

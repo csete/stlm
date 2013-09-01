@@ -7,7 +7,7 @@ xref:figure-infrastructure[] shows the telemetry downlink system in context of t
 
 [[figure-infrastructure]]
 .Sapphire data infrastructure
-image::images/sapphire_data_infrastructure.png["Sapphire data infrastructure", width=800]
+image::images/sapphire_data_infrastructure.png["Sapphire data infrastructure", scaledwidth="100%"]
 
 The telemetry system is based on a design originally created for the Euroluna Romit 2 cubesat and  has the following characteristics:
 
@@ -20,7 +20,7 @@ The telemetry system is based on a design originally created for the Euroluna Ro
 
 [[figure-tlmsys]]
 .Telemetry system overview
-image::images/telemetry_system_overview.png["Sapphire telemetry system overview", width=800, link="http://www.flickr.com/photos/csete/8858890978/"]
+image::images/telemetry_system_overview.png["Sapphire telemetry system overview", scaledwidth="100%", link="http://www.flickr.com/photos/csete/8858890978/"]
 
 The telemetry system contains the following components:
 
