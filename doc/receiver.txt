@@ -39,13 +39,102 @@ image::images/usrp1_rx.png["USRP1 receiver", width=500, link="http://www.flickr.
 
 The ADC on the USRP1 runs at 64 MHz and could theoretically provide 64 MHz of bandwidth. However, since the USRP1 is connected to the host PC through USB2, the usable real-time bandwidth is limited to 8 MHz at 16 bit resolution. To that end, the ADC is followed by an FPGA running a digital down converter (DDC) providing a means to convert the 64 MHz to a lower rate. The USRP1 supports a wide variety of sample rates between 250 kHz and 8 MHz. For the Sapphire mission we have been using 4 MHz bandwidth allowing us to monitor both transmitters at the same time.
 
-Complete schematics of the USRP1 and the WBX RF board are included in the https://github.com/csete/stlm/tree/master/receiver/hardware[receiver/hardware/] directory.
+Schematics of the USRP1 and the WBX RF board are included in the https://github.com/csete/stlm/tree/master/receiver/hardware[receiver/hardware/] directory.
 
 === Software receiver ===
 
 [[figure-strx]]
 .GNU Radio software receiver
 image::images/software_receiver.png["GNU Radio software receiver", width=800, link="http://www.flickr.com/photos/csete/9633295204/"]
+
+The software receiver is a C++ application built using the GNU Radio SDR framework. The receiver uses both DSP blocks and the runtime framework provided by GNU Radio. In addition to that, the telemetry receiver also takes advantage of the control port interfaces, which is one of the latest additions to GNU Radio.
+
+Most of the signal processing is executed by the GNU Radio scheduler and runs within that context. There are a few exceptions, namely the FFT block and the SNN calculations. These blocks are run in a separate boost thread scheduled periodically at 25-50 Hz. Since these are user interface related processings, there is no need to run them at higher rates.
+
+==== Signal processing blocks ====
+
+===== UHD source =====
+
+The UHD source block provides the interface to the USRP hardware. We chose to use gr-uhd as input source for the Sapphire mission because we only needed USRP interface. A gr-osmosdr source could be used instead with minor modifications.
+
+===== FFT =====
+
+This blocks performs complex FFT on the input spectrum. The FFT is performed in three stages:
+1. The first stage is a block in the GNU Radio flowgraph that stores the incoming samples in a circular buffer.
+2. The second stage fetches the last N samples from the circular buffer (N is the FFT size),  performs the FFT calculations and prepares the data for presentation (scales to dBFS and translates the spectrum). This function is executed periodically at 25-50 Hz outside of the GNU Radio scheduling.
+3. The third stage delivers the latest FFT data to external clients through the gnuradio-controlport interface.
+
+===== I/Q recorder =====
+
+This block is a simple file sink that dumps the complex I/Q samples to a file.
+
+We found that it is rather problematic to save I/Q files at high rate and perform real time signal processing at the same time on the same computer. When recording is enabled, the operating system will start caching until it runs out of available RAM. Once it's out of RAM it will start writing data to the disk periodically. The amount of data that needs to be written is huge and SDR processing is suspended during the write. Althogh the dropouts are very brief in duration, they are quite frequent and lead to loss of samples. Consequently, the correctly received packet rate dropped from 99% to 60%.
+
+There are several things one can do to improve the situation:
+
+1. Use faster hardware optimized for continuous disk I/O.
+2. Get more RAM and use a RAM disk if possible. This can't be used for long duration recordings.
+3. Tune the virtual memory parameters of the kernel. We found that following parameters allowed for continuous recording on a low end Dell server:
+----
+sysctl -w vm.swappiness=0
+sysctl -w vm.dirty_background_bytes=1048576
+sysctl -w vm.dirty_writeback_centisecs=20
+sysctl -w vm.dirty_expire_centisecs=30
+----
+
+The above settings pretty much disables caching and are not recommended for daily use on desktop systems. Use "vmstat 1" for monitoring how the system is caching. Documentation for the Linux kernel VM settings is available in the https://www.kernel.org/doc/Documentation/sysctl/vm.txt[sysctl/vm document].
+
+===== SNN & tracking =====
+
+===== Frequency translating FIR filter =====
+
+The frequency translating FIR filter has three functions:
+
+1. Translate the spectrum so that the signal of interest is at 0 Hz.
+2. Perform low pass filtering.
+3. Decimate the data to a lower rate.
+
+The frequency translation allows us to perform software-based tuning within the received spectrum. We use this functionality to select which downlink channel to decode i real time, see e.g. xref:figure-monitor[].
+
+The cut-off frequency of the low pass filter is initially set to 400 kHz but it can be adjusted during run time. The transition width is set to be equal to the cut-off frequency. Note that a 400 kHz cut-off corresponds to an 800 kHz wide channel when we are filtering at complex baseband.
+
+The decimation factor is set to 2 so the spectrum after the filter is 2 MHz wide.
+
+===== Demodulator =====
+
+The transmitter uses frequency shift keying followed by a Gaussian filter to eliminate the minimum shift requirement and reduce the bandwidth. On the receiver end we can use a standard quadrature demodulator followed by a matching filter to compensate for some of the inter-symbol interference introduced by the Gaussian shaping of the signal.
+
+The quadrature demodulator block takes a parameter, which determines the modulation factor. Sometimes it's called sensitivity, sometimes it's called gain -- we just call it _k_. In an analog system _k_ is the ratio between the quadrature rate and the maximum deviation (and reversed for the modulator). In a digital system this translates to samples per symbol assuming that the minimum shift condition is met.
+
+For the Sapphire mission we have used _k_ = 1, which is not optimal but sufficient thanks to the large margin we had in the link budget.
+
+[yellow-background]#FIXME: Gaussian filter is missing in the Sapphire receiver.#
+
+===== Carrier recovery =====
+
+Under optimal conditions the output from the quadrature demodulator will be ±1 corresponding to 0 and 1. One of these optimal conditions is that the receiver is tuned to the exact same frequency as the transmitter. In practice this is rather difficult and expensive to accomplish and it is better to tolerate slight frequency offsets.
+
+When using frequency modulation such an offset will cause the output levels from the demodulator to shift up or down by a constant and is therefore easy to compensate. We use a single pole IIR filter to calculate the running average of the output samples and correct for the offset before sending the samples to the clock recovery block. This has the advantage of being able to correct even for variable frequency drifts.
+
+For the Sapphire mission we used alpha = 1e-3, corresponding to a time constant 0.5 ms.
+
+===== Clock recovery =====
+
+Our sample rate after the channel filter is reduced to 2 Msps. With a symbol rate of 250k this gives us 8 samples per symbol to work with. However, clock skew between the transmitter and the receiver may lead to this rate being different in practice, e.g. 7.998
+
+The clock recovery block helps us determine this clock skew and select the "best" sample to be sent to the decoder.
+
+The Mueller & Muller clock recovery algorithm requires only one sample per symbol and finds the correct timing by calculating an error term using the present and the previous symbol:
+
+
+
+The Mueller & Muller clock recovery algorithm is sensitive to carrier offsets which is why we perform the carrier recovery described in the previous section.
+
+==== Command line interface ====
+
+bla bla....
+
+
 
 === Data decoder ===
 
