@@ -1,7 +1,7 @@
 [[chapter-format]]
 == Packet format and bitrate budget ==
 
-The Sapphire telemetry is a continuous stream of packetized data. The data comes from the GNC and AAU units and packed into the frame structure described here. When neither GNC nor AAU are transmitting data, the tranmitter will fill out the empty slots using own telemetry. This will ensure that the receiver can stay locked and synchronized to the signal even when there is no telemetry from the payload.
+The Sapphire telemetry is a continuous stream of packetized data. The data comes from the GNC and AAU units and packed into the frame structure described here. When neither GNC nor AAU are transmitting data, the transmitter will fill out the empty slots using own telemetry. This will ensure that the receiver can stay locked and synchronized to the signal even when there is no telemetry from the payload.
 
 The Sapphire telemetry system uses a very simple packet format shown on the figure below:
 
@@ -9,7 +9,7 @@ The Sapphire telemetry system uses a very simple packet format shown on the figu
 .The Sapphire packet structure
 image::images/packet_structure.png["Sapphire telemetry packet structure", width=800]
 
-A packet consists of the followinf parts:
+A packet consists of the following parts:
 
 * A fixed length packet header (11 bytes)
 * Variable length data field (up to 255 bytes)
@@ -55,7 +55,7 @@ A 16-bit CRC is added to each packet in order to allow verifying correct packet 
 .FEC frame
 image::images/packet_fec.png["Sapphire telemetry FEC frame", width=800]
 
-FEC is applied to all fields except the PREAMBLE and SYNC fields in the header. A FEC frame is thus 5 + N bytes long, where N is the length of the data field. Since we are using convolutional code we do not really have sepearate data and FEC fields as suggested by the figure. Instead, each byte is encoded as soon as it arrives and the coded data is put into th eoutput buffer.
+FEC is applied to all fields except the PREAMBLE and SYNC fields in the header. A FEC frame is thus 5 + N bytes long, where N is the length of the data field. Since we are using convolutional code we do not really have separate data and FEC fields as suggested by the figure. Instead, each byte is encoded as soon as it arrives and the coded data is put into the output buffer.
 
 [[section-bitrate]]
 === Downlink budget ===
