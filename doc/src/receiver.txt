@@ -27,7 +27,7 @@ The down-converter has built-in bias tee and is supplied through the coax. The s
 
 [[figure-wbx]]
 .WBX receiver
-image::images/wbx_rx.png["WBX receiver", scaledwidth="100%", link="http://www.flickr.com/photos/csete/9630059921/"]
+image::images/wbx_rx.png["WBX receiver", scaledwidth="90%", link="http://www.flickr.com/photos/csete/9630059921/"]
 
 The WBX transceiver board covers 50 MHz to 2.2 GHz and it has one of the best performing receivers for the USRPs. xref:figure-wbx[] shows a high level diagram of the receiver part.
 
@@ -35,7 +35,7 @@ The board has two amplifier stages (MGA62563 and MGA82563) followed by the ADL53
 
 [[figure-usrp]]
 .USRP1 receiver
-image::images/usrp1_rx.png["USRP1 receiver", scaledwidth="50%", link="http://www.flickr.com/photos/csete/9630059975/"]
+image::images/usrp1_rx.png["USRP1 receiver", scaledwidth="70%", link="http://www.flickr.com/photos/csete/9630059975/"]
 
 The ADC on the USRP1 runs at 64 MHz and could theoretically provide 64 MHz of bandwidth. However, since the USRP1 is connected to the host PC through USB2, the usable real-time bandwidth is limited to 8 MHz at 16 bit resolution. To that end, the ADC is followed by an FPGA running a digital down converter (DDC) providing a means to convert the 64 MHz to a lower rate. The USRP1 supports a wide variety of sample rates between 250 kHz and 8 MHz. For the Sapphire mission we have been using 4 MHz bandwidth allowing us to monitor both transmitters at the same time.
 
