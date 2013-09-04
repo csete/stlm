@@ -1,7 +1,8 @@
-= The Sapphire Telemetry System =
+= Sapphire Telemetry System =
 :Author: Alexandru Csete, Peter Scott
 :Date: September 2013
 :Revision: 1.1
+
 
 include::intro.txt[]
 
