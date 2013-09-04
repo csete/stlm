@@ -68,8 +68,8 @@ In the present configuration we have 250 kbps at our disposal. We apply rate 1/2
 [frame="topbot",grid="none",options="header,footer"]
 |======
 Source, Packet size [bytes/pkt], Packet overhead [bytes/pkt], Packet length [bits/pkt], Packet rate [pkt/sec], Bitrate [bps]
-GNC, 80, 14, 752, 102.25, 76789.62
-AAU, 48, 14, 496, 20.00, 9920.00
-TX,  10, 14, 192, 198.00, 38016.00
-Total, , , , , 125.83 k
+GNC, 80, 12, 736, 102.25, 75255.62
+AAU, 48, 12, 480, 20.00, 9600.00
+TX,  10, 12, 176, 198.00, 34848.00
+Total, , , , , 119.70 k
 |======
