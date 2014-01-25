@@ -3,6 +3,8 @@ Sapphire Telemetry System
 
 This repository contains the hardware and software for the Sapphire Telemetry System originally built for Copenhagen Suborbitals for their Sapphire test flight (mission video: http://www.youtube.com/watch?v=kcF5xNrb3HA).
 
+See how the downlink performed during the test flight where the motion cause very strong fading: http://www.youtube.com/watch?v=QEViCPNmkhM
+
 The telemetry system consists of a 2.4 GHz transmitter built around the ADF7242 and a receiver built around a USRP1 with GNU Radio SDR software.
 
 The project repository is organized in the following subdirectories:
