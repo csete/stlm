@@ -5,6 +5,8 @@ This repository contains the hardware and software for the Sapphire Telemetry Sy
 
 See how the downlink performed during the test flight where the motion cause very strong fading: http://www.youtube.com/watch?v=QEViCPNmkhM
 
+Some photos are available on Flickr: http://www.flickr.com/photos/csete/sets/72157633313520450/
+
 The telemetry system consists of a 2.4 GHz transmitter built around the ADF7242 and a receiver built around a USRP1 with GNU Radio SDR software.
 
 The project repository is organized in the following subdirectories:
